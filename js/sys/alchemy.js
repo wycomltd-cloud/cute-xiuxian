@@ -46,6 +46,8 @@
  * buyFurnace()          → {ok, msg}（購置下一座丹爐，自動扣靈石）
  * setFire(fireId)       → {ok, msg}（'fire_fan' 或已收集異火 id）
  * gainFire(fireId)      → bool（供其他系統發放異火；重複返回 false）
+ * saleInfo(pillId)      → {id,name,craftLingShi,price,count}|null；price=煉製靈石×60%向下取整
+ * sellPill(pillId)      → {ok,msg,price?}；每次售1顆，普通與極品同價
  * usePill(pillId)       → {ok, msg, eff?}（支持 recipeId 與 recipeId+'_star'；tox>80 拒服非解毒丹；
  *                          break 丹校驗 seg 境界段與同次突破 ≤3 顆）
  * pillInfo(pillId)      → {id,baseId,star,name,icon,grade,desc,effText,tox,usable,reason,count}（揹包展示用）
@@ -382,6 +384,26 @@
   // ===================== 服用丹藥 =====================
   function baseIdOf(pillId) {
     return pillId.slice(-STAR_SUFFIX.length) === STAR_SUFFIX ? pillId.slice(0, -STAR_SUFFIX.length) : pillId;
+  }
+
+  // 丹藥按單顆出售，普通／極品共用原丹方靈石成本，不含材料價值。
+  function saleInfo(pillId) {
+    if (typeof pillId !== 'string') return null;
+    const r = recipeOf(baseIdOf(pillId));
+    if (!r) return null;
+    const cost = Number(r.cost && r.cost.lingShi);
+    if (!Number.isFinite(cost) || cost < 0) return null;
+    const count = (XG.state.inv.pill || {})[pillId] || 0;
+    return { id: pillId, name: r.name + (baseIdOf(pillId) !== pillId ? '·極品' : ''),
+      craftLingShi: cost, price: Math.floor(cost * 0.6), count: count };
+  }
+  function sellPill(pillId) {
+    const info = saleInfo(pillId);
+    if (!info) return { ok: false, msg: '找不到這顆丹藥的丹方，暫時無法估價。' };
+    if (info.count < 1) return { ok: false, msg: '丹囊裡已沒有這顆丹藥，不能重複出售。' };
+    // 一次結算扣一顆與收益；不套用服丹效果、不增加丹毒或煉丹經驗。
+    XG.addRes({ pill: pillPair(pillId, -1), lingShi: info.price });
+    return { ok: true, price: info.price, msg: '丹藥找到新飯碗，靈石 +' + XG.util.fmt(info.price) + '！' };
   }
 
   function usePill(pillId) {
@@ -807,6 +829,9 @@
       const r = recipeOf(a.auto);
       return { recipeId: a.auto, name: r ? r.name : a.auto, icon: r ? r.icon : '丹' };
     },
+
+    saleInfo: saleInfo,
+    sellPill: sellPill,
 
     // 一鍵服丹：連續服用至丹盡或不可再服（丹毒>80/境界不合/破境丹滿 3 顆自動停）
     useAll(pillId) {

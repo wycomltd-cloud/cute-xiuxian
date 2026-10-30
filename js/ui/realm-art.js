@@ -14,8 +14,8 @@
     { id: 'dujie', scene: '紫霄雷台', outfit: '雷紫銀紋袍・金電護腕', src: 'assets/realms/08-dujie.webp', color: '#9474ba', quip: '雷公上班了，我先把新衣服穿好。' },
     { id: 'feisheng', scene: '虹光天門', outfit: '虹彩天仙袍・金冠輕紗', src: 'assets/realms/09-feisheng.webp', color: '#d6b17e', quip: '終於飛升！請問仙界哪裡可以補眠？' },
   ];
-  // 現有插畫保留為女主角；男主角沿用各境界場景，採獨立角色與服裝素材。
-  entries.forEach(function (e) { e.gender = 'female'; e.key = e.id + ':female'; });
+  // 女主角各境界採獨立長髮版；男主角沿用各境界場景與原有男裝。
+  entries.forEach(function (e, i) { e.gender = 'female'; e.key = e.id + ':female'; e.src = 'assets/genders/female/' + String(i).padStart(2, '0') + '-' + e.id + '.webp'; e.outfit += '・長髮披肩'; });
   const maleOutfits = ['青白直襟袍・簡玉髮簪', '青竹男式仙袍・玉綠肩披', '白金男式法袍・金玉腰封', '月白銀蓮袍・紫玉髮簪', '碧青星紋袍・琉璃肩巾', '靛紫星月袍・銀紋肩氅', '珊瑚金繡袍・雙玉腰帶', '白金天宮袍・金冠雲氅', '雷紫銀甲袍・金電護腕', '虹光天仙袍・金冠輕氅'];
   const male = entries.map(function (e, i) {
     return Object.assign({}, e, { gender: 'male', key: e.id + ':male', src: 'assets/genders/male/' + String(i).padStart(2, '0') + '-' + e.id + '.webp', outfit: maleOutfits[i] });

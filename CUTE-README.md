@@ -45,3 +45,8 @@
 ## Cute v1.6 裝備回爐與出售
 forge.disposalInfo(uid) 回傳 mat/gems/marketLingYu/lingYu/buyerName/recycleErr/sellErr；forge.recycle(uid) 與 sell(uid) 返回 {ok,reward,buyerName,name} 或 {ok:false,err}。
 只處理未穿戴裝備。回爐按 craftCost(baseId).mat 的50%逐項向下取整，不返打造靈石或升級投入；出售按坊市 equipPerGrade × max(1,實例grade) ÷500 四捨五入（至少1）所得靈玉基準價，再乘60%向下取整。出售需有存活道友可收購，不採賣家隨機浮動。兩者完整退回鑲嵌寶石、移除原件，重算神品數/屬性，透過 addRes 發收益及存檔標記；重複操作不發收益。隱藏/掉落裝備按相同底材配方處理。UI顯示收益與永久移除提示，確認後執行，可取消返回詳情。
+
+
+## Cute v1.7 女主角長髮與丹藥出售
+女主角十境界素材改為 assets/genders/female/00-lianqi.webp 至09-feisheng.webp，選角、首頁與相機使用相同長髮版本；男主角素材不變。
+alchemy.saleInfo(pillId) 回傳 {id,name,craftLingShi,price,count}|null，price=floor(原丹方 cost.lingShi×0.6)；sellPill(pillId)每次扣1顆並給靈石，返回{ok,msg,price?}。普通與_star極品同價；未知丹方、無庫存拒售，不受丹毒、境界、未習得丹方影響。不觸發藥效、經驗或丹毒。透過addRes一次結算；確認彈窗預覽單價，可取消。升版公告內容與快取同步為1.7。

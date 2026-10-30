@@ -692,8 +692,12 @@
     if (info.usable && info.count > 1) {
       H.push('<button class="btn btn-ghost uta-btn-sm" data-act="al:useall" data-id="' + esc(info.id) + '">全服</button>');
     }
-    if (!info.usable && info.reason) H.push('<span class="uta-no">' + esc(info.reason) + '</span>');
-    H.push('</div></div>');
+    const sale = sys('alchemy').saleInfo(info.id);
+    if (sale) H.push('<button class="btn uta-btn-sm" data-act="al:sell" data-id="' + esc(info.id) + '">出售</button>');
+    H.push('</div>');
+    if (sale) H.push('<div class="uta-mini">每顆可售 🪙 ' + fmtInt(sale.price) + ' 靈石（煉製靈石成本的60%）</div>');
+    if (!info.usable && info.reason) H.push('<div class="uta-no">' + esc(info.reason) + '</div>');
+    H.push('</div>');
     return H.join('');
   }
 
@@ -740,6 +744,19 @@
     const A = sys('alchemy'); if (!A) return;
     const id = arg || (t && t.getAttribute && t.getAttribute('data-id'));
     if (op === 'sub') { SA.sub = arg; rerender('alchemy'); return; }
+    if (op === 'sell') {
+      const sale = A.saleInfo(id);
+      if (!sale || sale.count < 1) { toast('丹囊裡已沒有這顆丹藥。', true); rerender('alchemy'); return; }
+      XG.ui.modal({ title: '出售丹藥 🪙', html: '<p>出售「' + esc(sale.name) + '」×1？</p><p><b>獲得靈石 ×' + fmtInt(sale.price) + '</b></p><p class="uta-mini">煉製靈石 ' + fmtInt(sale.craftLingShi) + ' ×60%，無條件捨去。普通與極品同價；每次只出售一顆，不會觸發服用效果。</p>', buttons: [
+        { text: '再想想', cls: 'btn-ghost' },
+        { text: '確認出售', cls: 'btn-primary', cb: function () {
+          const result = A.sellPill(id);
+          toast(result.msg, result.ok ? 'gold' : 'err');
+          rerender('alchemy');
+        } }
+      ] });
+      return;
+    }
     let r = null;
     if (op === 'craft') { r = A.startCraft(id); if (r && r.ok) pop('開爐', 'pop-good'); }
     else if (op === 'auto') {

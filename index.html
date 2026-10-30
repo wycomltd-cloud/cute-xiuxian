@@ -8,7 +8,7 @@
   <meta name="description" content="人可以休息，修為照樣上班。可愛幽默的完整放置修仙：功法、靈寵、煉丹、探索、道友與輪回。">
   <meta name="theme-color" content="#739b76">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/cute.css?v=1.6">
+  <link rel="stylesheet" href="css/cute.css?v=1.7">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <style>
     /* 啓動佔位樣式（防白屏閃爍），主樣式在 css/style.css */
@@ -25,7 +25,7 @@
     <div class="cute-mast-actions"><span class="cute-status">仙氣供應正常</span><button class="cute-icon-btn" data-cute-help aria-label="新手說明">?</button><button class="cute-icon-btn" data-cute-tab="settings" aria-label="設定與存檔">⚙</button></div>
   </header>
   <div class="cute-shell">
-  <aside class="cute-sidebar" aria-label="遊戲導覽"><nav id="cute-side-nav"></nav><div class="cute-sidebar-note"><span>☁️</span><b>今日份仙界小提醒</b>你負責好好生活，<br>修為負責偷偷長大。<br>離線也有收益，最多48小時。</div><p class="cute-attribution">可愛改作 · v1.6<br>Based on <a href="https://github.com/shanawakiminouso-hub/xiuxian-idle" target="_blank" rel="noopener">xiuxian-idle</a> · <a href="LICENSE">MIT License</a></p></aside>
+  <aside class="cute-sidebar" aria-label="遊戲導覽"><nav id="cute-side-nav"></nav><div class="cute-sidebar-note"><span>☁️</span><b>今日份仙界小提醒</b>你負責好好生活，<br>修為負責偷偷長大。<br>離線也有收益，最多48小時。</div><p class="cute-attribution">可愛改作 · v1.7<br>Based on <a href="https://github.com/shanawakiminouso-hub/xiuxian-idle" target="_blank" rel="noopener">xiuxian-idle</a> · <a href="LICENSE">MIT License</a></p></aside>
   <div id="app">
     <!-- 頂部狀態欄容器（頭像/境界/修爲進度/靈石/靈玉，由 ui-core 填充） -->
     <header id="topbar"></header>
@@ -48,59 +48,59 @@
   <div id="pop-root"></div>
 
   <!-- 核心層（順序固定，契約 §0） -->
-  <script src="js/core/util.js?v=1.6"></script>
-  <script src="js/core/bus.js?v=1.6"></script>
-  <script src="js/core/cfg.js?v=1.6"></script>
-  <script src="js/core/state.js?v=1.6"></script>
-  <script src="js/core/character.js?v=1.6"></script>
-  <script src="js/core/save.js?v=1.6"></script>
-  <script src="js/core/stats.js?v=1.6"></script>
-  <script src="js/core/offline.js?v=1.6"></script>
+  <script src="js/core/util.js?v=1.7"></script>
+  <script src="js/core/bus.js?v=1.7"></script>
+  <script src="js/core/cfg.js?v=1.7"></script>
+  <script src="js/core/state.js?v=1.7"></script>
+  <script src="js/core/character.js?v=1.7"></script>
+  <script src="js/core/save.js?v=1.7"></script>
+  <script src="js/core/stats.js?v=1.7"></script>
+  <script src="js/core/offline.js?v=1.7"></script>
 
   <!-- 數據層（任意順序，內部只做數據登記） -->
-  <script src="js/data/names.js?v=1.6"></script>
-  <script src="js/data/gongfa.js?v=1.6"></script>
-  <script src="js/data/pills.js?v=1.6"></script>
-  <script src="js/data/pets.js?v=1.6"></script>
-  <script src="js/data/equips.js?v=1.6"></script>
-  <script src="js/data/world.js?v=1.6"></script>
-  <script src="js/data/events_a.js?v=1.6"></script>
-  <script src="js/data/events_b.js?v=1.6"></script>
-  <script src="js/data/achievements.js?v=1.6"></script>
-  <script src="js/data/fellows.js?v=1.6"></script>
+  <script src="js/data/names.js?v=1.7"></script>
+  <script src="js/data/gongfa.js?v=1.7"></script>
+  <script src="js/data/pills.js?v=1.7"></script>
+  <script src="js/data/pets.js?v=1.7"></script>
+  <script src="js/data/equips.js?v=1.7"></script>
+  <script src="js/data/world.js?v=1.7"></script>
+  <script src="js/data/events_a.js?v=1.7"></script>
+  <script src="js/data/events_b.js?v=1.7"></script>
+  <script src="js/data/achievements.js?v=1.7"></script>
+  <script src="js/data/fellows.js?v=1.7"></script>
 
   <!-- 系統層（只做註冊，glue.js 跨系統膠水排最後） -->
-  <script src="js/sys/cultivation.js?v=1.6"></script>
-  <script src="js/sys/gongfa.js?v=1.6"></script>
-  <script src="js/sys/alchemy.js?v=1.6"></script>
-  <script src="js/sys/forge.js?v=1.6"></script>
-  <script src="js/sys/pets.js?v=1.6"></script>
-  <script src="js/sys/cave.js?v=1.6"></script>
-  <script src="js/sys/expedition.js?v=1.6"></script>
-  <script src="js/sys/dungeon.js?v=1.6"></script>
-  <script src="js/sys/pvp.js?v=1.6"></script>
-  <script src="js/sys/adventure.js?v=1.6"></script>
-  <script src="js/sys/fellows.js?v=1.6"></script>
-  <script src="js/sys/reincarn.js?v=1.6"></script>
-  <script src="js/sys/collection.js?v=1.6"></script>
-  <script src="js/sys/guide.js?v=1.6"></script>
-  <script src="js/sys/glue.js?v=1.6"></script>
+  <script src="js/sys/cultivation.js?v=1.7"></script>
+  <script src="js/sys/gongfa.js?v=1.7"></script>
+  <script src="js/sys/alchemy.js?v=1.7"></script>
+  <script src="js/sys/forge.js?v=1.7"></script>
+  <script src="js/sys/pets.js?v=1.7"></script>
+  <script src="js/sys/cave.js?v=1.7"></script>
+  <script src="js/sys/expedition.js?v=1.7"></script>
+  <script src="js/sys/dungeon.js?v=1.7"></script>
+  <script src="js/sys/pvp.js?v=1.7"></script>
+  <script src="js/sys/adventure.js?v=1.7"></script>
+  <script src="js/sys/fellows.js?v=1.7"></script>
+  <script src="js/sys/reincarn.js?v=1.7"></script>
+  <script src="js/sys/collection.js?v=1.7"></script>
+  <script src="js/sys/guide.js?v=1.7"></script>
+  <script src="js/sys/glue.js?v=1.7"></script>
 
   <!-- UI 層（ui-core → ui-tabs-*） -->
-  <script src="js/ui/ui-core.js?v=1.6"></script>
-  <script src="js/ui/realm-art.js?v=1.6"></script>
-  <script src="js/ui/scene-photo.js?v=1.6"></script>
-  <script src="js/ui/scene.js?v=1.6"></script>
-  <script src="js/ui/ui-tabs-a.js?v=1.6"></script>
-  <script src="js/ui/ui-tabs-b.js?v=1.6"></script>
-  <script src="js/ui/ui-tabs-c.js?v=1.6"></script>
+  <script src="js/ui/ui-core.js?v=1.7"></script>
+  <script src="js/ui/realm-art.js?v=1.7"></script>
+  <script src="js/ui/scene-photo.js?v=1.7"></script>
+  <script src="js/ui/scene.js?v=1.7"></script>
+  <script src="js/ui/ui-tabs-a.js?v=1.7"></script>
+  <script src="js/ui/ui-tabs-b.js?v=1.7"></script>
+  <script src="js/ui/ui-tabs-c.js?v=1.7"></script>
 
-  <script src="js/ui/cute-shell.js?v=1.6"></script>
-  <script src="js/ui/character-choice.js?v=1.6"></script>
+  <script src="js/ui/cute-shell.js?v=1.7"></script>
+  <script src="js/ui/character-choice.js?v=1.7"></script>
 
-  <script src="js/ui/update-notice.js?v=1.6"></script>
+  <script src="js/ui/update-notice.js?v=1.7"></script>
 
   <!-- 啓動入口（最後加載） -->
-  <script src="js/main.js?v=1.6"></script>
+  <script src="js/main.js?v=1.7"></script>
 </body>
 </html>
