@@ -20,6 +20,7 @@
  *                                gems:[gemInstId|null], gemView:[{instId,name,icon,lv,eff}|null],
  *                                spirit, setId, setName, equipped, flat:{atk,def,hp},
  *                                totalAffixPct:{修飾鍵:合計%}, power } | null
+ * disposalInfo(uid)        → 回爐材料、寶石、坊市靈玉基準價與60%售價、道友買家、阻擋原因
  * enhanceInfo(uid)           → { lv, max, cost, rate, doubled, pity, pityMax } | null
  * reforgeCost(uid)           → { base, perLock, locked, total } | null（total=本次洗練靈玉總價）
  * starInfo(uid)              → { star, max, cost, needDup, dupCandidates:[uid…] } | null
@@ -35,6 +36,8 @@
  * craft(baseId)              → { ok, uid, equip } 打造指定底材（耗 ore_* + 靈石）
  * equip(uid)                 → { ok, swapped } 穿上（同槽舊件自動回背包）
  * unequip(slot)              → { ok } 卸下指定槽位
+ * recycle(uid)             → { ok, reward, name } 回爐未穿戴裝備，返還50%原始材料與寶石
+ * sell(uid)                → { ok, reward, buyerName, name } 出售未穿戴裝備，獲60%基準靈玉與寶石
  * enhance(uid)               → { ok, success, lv, rate, pity } 強化一次（失敗不掉級）
  * reforge(uid, affixIdx)     → { ok, affix } 重 roll 單條詞條（鎖定的詞條每條加價，且不可被洗）
  * toggleLock(uid, affixIdx)  → { ok, locked } 切換詞條鎖定（免費）
@@ -315,6 +318,51 @@
     }
     return out;
   }
+
+  /* ==================== 回爐 / 出售（僅揹包裝備） ==================== */
+  function disposalInfo(uid) {
+    const eq = getEquip(uid);
+    if (!eq) return null;
+    const cost = craftCost(eq.baseId);
+    if (!cost) return null;
+    const mat = {};
+    // 原始打造配方的材料返還一半；靈石與後續強化、升星投入不在返還範圍。
+    for (const id in cost.mat) {
+      const n = Math.floor(cost.mat[id] * 0.5);
+      if (n > 0) mat[id] = n;
+    }
+    const gems = {};
+    (eq.gems || []).forEach(function (id) {
+      if (parseGemInst(id)) gems[id] = (gems[id] || 0) + 1;
+    });
+    const mr = XG.data.world && XG.data.world.marketRules;
+    const bp = mr && mr.stock && mr.stock.basePrice;
+    // 與坊市同一基準與靈石→靈玉換算；不採隨機賣家的浮動報價。
+    const marketLingYu = Math.max(1, Math.round(((bp && bp.equipPerGrade) || 800) * Math.max(1, eq.grade || 0) / 500));
+    const buyer = (XG.state.fellows || []).find(function (f) { return f.alive; });
+    const err = isEquipped(uid) ? '這件還穿在身上，請先卸下再處理。' : null;
+    return { mat: mat, gems: gems, marketLingYu: marketLingYu,
+      lingYu: Math.floor(marketLingYu * 0.6), buyerName: buyer ? buyer.name : null,
+      recycleErr: err, sellErr: err || (!buyer ? '暫時沒有道友可收購，稍後再來。' : null) };
+  }
+  function dispose(uid, kind) {
+    const info = disposalInfo(uid);
+    if (!info) return { ok: false, err: '裝備已不在揹包，不能重複領取收益。' };
+    const err = kind === 'recycle' ? info.recycleErr : info.sellErr;
+    if (err) return { ok: false, err: err };
+    const eq = getEquip(uid), b = baseOf(eq.baseId);
+    const reward = kind === 'recycle' ? { mat: Object.assign({}, info.mat) } : { lingYu: info.lingYu, mat: {} };
+    for (const id in info.gems) reward.mat[id] = (reward.mat[id] || 0) + info.gems[id];
+    // 先移除實例，再發資源；舊詳情或重複點擊都不能重複結算。
+    removeItem(uid);
+    recount();
+    invalidate();
+    XG.addRes(reward);
+    dirty();
+    return { ok: true, reward: reward, buyerName: info.buyerName, name: b.name };
+  }
+  function recycle(uid) { return dispose(uid, 'recycle'); }
+  function sell(uid) { return dispose(uid, 'sell'); }
 
   /* ==================== 穿脫 ==================== */
   function equip(uid) {
@@ -859,6 +907,11 @@
     craft: craft,
     craftCost: craftCost,
     getCraftList: getCraftList,
+
+    // 回爐 / 出售
+    disposalInfo: disposalInfo,
+    recycle: recycle,
+    sell: sell,
 
     // 穿脫
     equip: equip,

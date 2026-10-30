@@ -41,3 +41,12 @@ html,body{background:#f7f7ee;color:var(--ink);font:14px/1.7 var(--font-kai)}body
 @media(prefers-reduced-motion:reduce){.cute-scene-camera{transition:none}}
 /* 五次破境天劫：三／六／九重雷關，保留可愛清楚的戰報。 */
 .cute-trib-intro{padding:12px 14px;border:1px solid #e0d6ee;border-radius:13px;background:#f4eff9;color:#79638c;margin-bottom:10px}.cute-trib-intro p{font-size:12px;line-height:1.8;margin:5px 0 0}.cute-trib-waves{display:grid;gap:6px;margin:12px 0}.cute-trib-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border:1px solid #e4e7da;border-radius:10px;background:#fafbf5;color:#7c846f;font-size:12px}.cute-trib-row small{display:block;font-size:10px;color:#939985;margin-top:2px}.cute-trib-row>b{font-size:11px;white-space:nowrap}.cute-trib-row.is-pass{background:#edf5e7;border-color:#d3e2c9;color:#5a7d4c}.cute-trib-row.is-fail{background:#fff0eb;border-color:#e8c9be;color:#a36652}.cute-trib-row.is-unreached{opacity:.55}.cute-trib-result{background:#f3f4e9;border-radius:12px;padding:13px;line-height:1.8;color:#687557;font-size:13px}
+
+/* 每版一次的更新公告：沿用奶油白與鼠尾草綠。 */
+.cute-update-dialog{box-sizing:border-box;width:calc(100% - 36px);max-width:440px;max-height:85dvh;padding:28px;border:1px solid #dce4cf;border-radius:26px;background:#fffdf5;color:#53694e;box-shadow:0 18px 70px #324b3438;overflow:auto}
+.cute-update-dialog::backdrop{background:#263c3259}
+.cute-update-kicker{font-size:12px;letter-spacing:.14em;color:#8e9c79}
+.cute-update-dialog h2{font-size:23px;line-height:1.45;margin:12px 0 4px}.cute-update-version{margin:0 0 18px;color:#9a8b63;font-size:13px}.cute-update-dialog ul{padding-left:22px;line-height:1.8;font-size:15px}.cute-update-dialog li+li{margin-top:10px}.cute-update-dialog .btn{width:100%;margin-top:15px;min-height:46px}
+
+/* 裝備操作固定三欄，手機上也保持橫排。 */
+.cute-equip-actions{display:flex;flex-wrap:nowrap!important;gap:6px}.cute-equip-actions .btn{flex:1;min-width:0;padding:10px 4px!important;font-size:14px!important;white-space:nowrap}

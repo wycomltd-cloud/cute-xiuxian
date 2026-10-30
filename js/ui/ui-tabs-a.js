@@ -1026,11 +1026,43 @@
       } else H.push('<div class="uta-mini">' + esc((cw && cw.err) || '神品裝備強化 +15 方可孕育器靈') + '</div>');
     }
     // 穿脫
-    H.push('<div class="uta-row" style="margin-top:8px">');
+    H.push('<div class="uta-row cute-equip-actions" style="margin-top:8px">');
     if (d.equipped) H.push('<button class="btn btn-ghost" data-act="fg:unequip" data-id="' + esc(d.slot) + '">卸下</button>');
     else H.push('<button class="btn btn-primary" data-act="fg:equip" data-id="' + esc(uid) + '">裝備上身</button>');
+    if (!d.equipped) {
+      H.push('<button class="btn" data-act="fg:recycle" data-id="' + esc(uid) + '">回爐</button>');
+      H.push('<button class="btn" data-act="fg:sell" data-id="' + esc(uid) + '">出售</button>');
+    }
     H.push('</div>');
     return H.join('');
+  }
+
+  // 收益先預覽，確認後才移除；取消可回到同一件裝備詳情。
+  function fgDispose(F, uid, kind) {
+    const info = F.disposalInfo(uid), d = F.getEquipDetail(uid);
+    if (!info || !d) { toast('裝備已不在揹包。', true); closeModal(); rerender('forge'); return; }
+    const recycling = kind === 'recycle';
+    const err = recycling ? info.recycleErr : info.sellErr;
+    if (err) { toast(err, true); return; }
+    function matText(mat) {
+      return Object.keys(mat).map(function (id) { return matName(id) + ' ×' + fmtInt(mat[id]); }).join('、');
+    }
+    const gain = recycling ? matText(info.mat) : '靈玉 ×' + fmtInt(info.lingYu);
+    let html = '<p>「' + esc(d.name) + '」' + (recycling ? '準備回爐，退休後改當原材料。' : '將賣給道友「' + esc(info.buyerName) + '」，幫它找個新主人。') + '</p>';
+    html += '<p><b>可獲得：' + esc(gain) + '</b></p>';
+    html += recycling ? '<p class="uta-mini">原始打造配方材料返還 50%，數量無條件捨去；不返還打造靈石。</p>' : '<p class="uta-mini">坊市同品階靈玉基準價 ' + info.marketLingYu + ' ×60%，無條件捨去；不含賣家性格、關係或折扣浮動。</p>';
+    if (Object.keys(info.gems).length) html += '<p>鑲嵌寶石完整退回：' + esc(matText(info.gems)) + '</p>';
+    html += '<p class="uta-mini">確認後裝備會消失，無法復原；強化、洗練、升星與器靈投入不另返還。</p>';
+    XG.ui.modal({ title: recycling ? '回爐確認 🔥' : '出售確認 💠', html: html, buttons: [
+      { text: '再想想', cls: 'btn-ghost', cb: function () { openForgeDetail(uid); return false; } },
+      { text: recycling ? '確認回爐' : '確認出售', cls: 'btn-primary', cb: function () {
+        const r = recycling ? F.recycle(uid) : F.sell(uid);
+        if (!r.ok) { toast(r.err, true); return; }
+        _fgUid = null;
+        toast(recycling ? '材料回來了，裝備去泡岩漿了。' : '成交！靈玉 +' + fmtInt(r.reward.lingYu), 'gold');
+        rerender('forge');
+      } }
+    ] });
   }
 
   function fgAct(op, arg, t) {
@@ -1038,6 +1070,7 @@
     const id = (t && t.getAttribute && t.getAttribute('data-id')) || arg;
     if (op === 'sub') { SF.sub = arg; rerender('forge'); return; }
     if (op === 'detail') { openForgeDetail(id); return; }
+    if (op === 'recycle' || op === 'sell') { fgDispose(F, id, op); return; }
     let r = null;
     if (op === 'craft') {
       r = F.craft(id);
