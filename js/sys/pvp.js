@@ -1,7 +1,7 @@
 /* pvp.js：異步鬥法「論劍」系統（純邏輯層，契約 §10 模塊協議）
  *
  * 玩法：對手池=state.fellows（道友）；匹配=玩家戰力±40% 篩選 + 強度貼近/宿敵偏好，無匹配時全表隨機；
- *      戰鬥自動結算：雙方戰力 × 流派克制（劍→符→陣→丹→體→劍，剋制方 +15%）× 隨機 0.9~1.1，三局兩勝；
+ *      戰鬥自動結算：雙方戰力 × 流派克制（劍→符→陣→丹→體→劍，玩家依距離 +20%/+10%/0%/-10%/-20%）× 隨機 0.9~1.1，三局兩勝；
  *      週期=10 分鐘一輪，段位 pts 閾值：青銅0/白銀1200/黃金1500/白金1800/鑽石2100/仙尊2500；
  *      勝 +30 / 負 -15（按對手強度浮動）；連勝加成：2 連勝起每場勝利 +3 遞增、封頂 +30（敗北清零）；
  *      每日前 5 場發靈石+修為，之後僅 pts；戰報 history ≤20；
@@ -32,8 +32,8 @@
  *   → [{ t, name, uid, win, delta, pts, rounds:[bool..], rival }]  // 新→舊，≤20 條
  * XG.sys.pvp.claimSeason()
  *   → { ok:false, reason } 或 { ok:true, count, lingYu, frags:{gfId:n} }  // 一鍵補領全部賽季獎勵
- * XG.sys.pvp.getSchool() → { id, name }            // 玩冢論劍流派（默認按靈根推導）
- * XG.sys.pvp.setSchool(id) → bool                  // id∈ jian/fu/zhen/dan/ti
+ * XG.sys.pvp.getSchool() → { id, name }            // 玩冢論劍流派（本世鎖定修行）
+ * XG.sys.pvp.setSchool(id) → bool                  // 舊API保留，固定返回false，禁止中途換修
  * XG.sys.pvp.getTiers() → TIERS 拷貝               // 段位表[{id,name,min,yu,frags}]
  * XG.sys.pvp.fellowPower(f) → number               // 道友戰力估算（fellows 系統有同名函數則委託之）
  *
@@ -75,11 +75,14 @@
     { id: 'zuanshi',  name: '鑽石', min: 2100, yu: 3,  frags: 1 },
     { id: 'xianzun',  name: '仙尊', min: 2500, yu: 5,  frags: 2 },
   ];
-  // 流派克制環：key 剋制 value（劍→符→陣→丹→體→劍），剋制方戰力 +15%
-  const COUNTER = { jian: 'fu', fu: 'zhen', zhen: 'dan', dan: 'ti', ti: 'jian' };
-  const COUNTER_MULT = 1.15;
-  // 靈根→默認論劍流派推導（金劍/木丹/水符/火體/土陣，變異兜底劍修）
-  const ROOT2SCHOOL = { jin: 'jian', mu: 'dan', shui: 'fu', huo: 'ti', tu: 'zhen' };
+  // 流派克制環：key 剋制 value（劍→符→陣→丹→體→劍），玩家依距離調整戰力
+  const SCHOOL_RING = ['jian', 'fu', 'zhen', 'dan', 'ti'];
+  // 僅對玩家套用一次有號修正，對手使用原戰力，避免同一剋制重複計算。
+  function counterBonus(mySchool, oppSchool) {
+    const a = SCHOOL_RING.indexOf(mySchool), b = SCHOOL_RING.indexOf(oppSchool);
+    if (a < 0 || b < 0) return 0;
+    return [0, 20, 10, -10, -20][(b - a + 5) % 5];
+  }
 
   const MATCH_RANGE = 0.4;     // 匹配戰力窗口 ±40%
   const WIN_PTS = 30;          // 勝利基礎積分
@@ -107,7 +110,7 @@
     if (!Array.isArray(p.history)) p.history = [];
     if (!Array.isArray(p.pending)) p.pending = [];       // 賽季待補領 [{season,tierId,tierName,lingYu,frags,t}]
     if (typeof p.streak !== 'number') p.streak = 0;      // 當前連勝
-    if (typeof p.school !== 'string' || !COUNTER[p.school]) p.school = ''; // 論劍流派（'' 待推導）
+    // 舊pvp.school僅保留為舊檔資料，不再作為玩家修行依據。
     if (p.auto === undefined) p.auto = null; // 自動連戰：null=關閉，{cd}=開啓+冷卻秒數
     return p;
   }
@@ -283,6 +286,7 @@
   /* ---------------- 戰鬥結算 ---------------- */
   function fight(uid) {
     if (!XG.cfg.isUnlocked('pvp')) return { ok: false, reason: '論劍臺尚未開啓（需金丹5層）。' };
+    if (!getSchool().id || (XG.character && XG.character.needsChoice())) return { ok: false, reason: '請先在選角畫面選定本世性別與修行。' };
     const p = st();
     checkSeason();
 
@@ -304,13 +308,12 @@
     if (!opp) opp = match();
     if (!opp) return { ok: false, reason: '暫無道友可一戰，待廣結仙緣後再來。' };
 
-    const mySchool = p.school || 'jian';
+    const mySchool = getSchool().id;
     const pp = playerPower();
     const op = Math.max(1, opp.power);
-    // 流派克制（固定於整場）：我克對面 / 對面克我 / 無剋制
-    const cmP = COUNTER[mySchool] === opp.school ? COUNTER_MULT : 1;
-    const cmO = COUNTER[opp.school] === mySchool ? COUNTER_MULT : 1;
-    const counter = cmP > 1 ? 'win' : (cmO > 1 ? 'lose' : 'none');
+    const counterPct = counterBonus(mySchool, opp.school);
+    const cmP = 1 + counterPct / 100, cmO = 1;
+    const counter = counterPct > 0 ? 'win' : counterPct < 0 ? 'lose' : 'none';
 
     // 三局兩勝：每局 戰力×剋制×隨機0.9~1.1
     const rounds = [];
@@ -371,7 +374,7 @@
     const rival = opp.relation === 'rival';
     p.history.unshift({
       t: Date.now(), name: opp.name, uid: opp.uid, win: win,
-      delta: delta, pts: p.pts, rounds: rounds, rival: rival,
+      delta: delta, pts: p.pts, rounds: rounds, rival: rival, counterPct: counterPct, school: mySchool, oppSchool: opp.school,
     });
     if (p.history.length > HISTORY_CAP) p.history.length = HISTORY_CAP;
 
@@ -411,7 +414,7 @@
 
     if (XG.bus) XG.bus.emit('save:dirty');
     return {
-      ok: true, win: win, rounds: rounds, opp: opp, counter: counter,
+      ok: true, win: win, rounds: rounds, opp: opp, counter: counter, counterPct: counterPct, playerPower: pp, adjustedPlayerPower: pp * cmP, opponentPower: op,
       delta: delta, pts: p.pts,
       tier: { id: tierAfter.id, name: tierAfter.name, min: tierAfter.min },
       tierUp: tierUp, tierDown: tierDown,
@@ -447,6 +450,7 @@
   /* ---------------- 查詢接口（UI 對接面） ---------------- */
   function canFight() {
     if (!XG.cfg.isUnlocked('pvp')) return { ok: false, reason: '論劍臺尚未開啓（需金丹5層）。' };
+    if (!getSchool().id || (XG.character && XG.character.needsChoice())) return { ok: false, reason: '請先在選角畫面選定本世性別與修行。' };
     if (!oppPool().length) return { ok: false, reason: '暫無道友可一戰。' };
     return { ok: true };
   }
@@ -465,7 +469,7 @@
       wins: p.wins, losses: p.losses, streak: p.streak,
       dailyLeft: dailyLeft(), dailyMax: DAILY_MAX,
       season: p.season, pending: XG.util.deepClone(p.pending),
-      school: p.school, schoolName: schoolName(p.school),
+      school: getSchool().id, schoolName: getSchool().name,
       historyLen: p.history.length,
     };
   }
@@ -474,26 +478,20 @@
 
   function getTiers() { return XG.util.deepClone(TIERS); }
 
-  function getSchool() { return { id: st().school, name: schoolName(st().school) }; }
-
-  function setSchool(id) {
-    if (!COUNTER[id]) return false;
-    st().school = id;
-    if (XG.bus) XG.bus.emit('save:dirty');
-    return true;
+  function getSchool() {
+    const id = XG.state.player.school;
+    return { id: SCHOOL_RING.indexOf(id) >= 0 ? id : null, name: SCHOOL_RING.indexOf(id) >= 0 ? schoolName(id) : '未選修行' };
   }
+  // 保留舊API但禁止換流派：只能在選角流程選定本世修行。
+  function setSchool(id) { return false; }
 
   /* ---------------- 模塊協議（契約 §10） ---------------- */
   XG.sys.pvp = {
     id: 'pvp',
 
-    // 啓動自恢復：修復狀態、推導默認論劍流派、補做跨周結算
+    // 啓動自恢復：修復狀態，修行由選角流程決定、補做跨周結算
     init() {
       const p = st();
-      if (!p.school) {
-        const root = XG.state.player && XG.state.player.spiritRoot;
-        p.school = ROOT2SCHOOL[root && root.type] || 'jian';
-      }
       checkSeason();
     },
 
@@ -535,6 +533,7 @@
     getHistory: getHistory,
     claimSeason: claimSeason,
     getSchool: getSchool,
+    counterBonus: counterBonus,
     setSchool: setSchool,
     getTiers: getTiers,
     fellowPower: fellowPower,

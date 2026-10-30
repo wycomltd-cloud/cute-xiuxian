@@ -441,7 +441,7 @@
     try { rate = (XG.stats && XG.stats.get().cultRate) || 0; } catch (e) { rate = 0; }
     const set = function (id, txt) { const el = $(id); if (el && el.textContent !== txt) el.textContent = txt; };
     set('xgh-avatar', (realm.name || '煉').charAt(0));
-    set('xgh-name', (p.name || '無名散修') + (XG.character ? ' ' + XG.character.symbol(p.gender) : ''));
+    set('xgh-name', (p.name || '無名散修') + (XG.character ? ' ' + XG.character.symbol(p.gender) + (XG.character.schools.find(function (s) { return s.id === p.school; }) ? '・' + XG.character.schools.find(function (s) { return s.id === p.school; }).name : '') : ''));
     set('xgh-realm', realm.name + (last ? '' : ' ' + (p.layer || 1) + ' 層'));
     const fill = $('xgh-top-fill');
     if (fill) fill.style.width = pct.toFixed(1) + '%';

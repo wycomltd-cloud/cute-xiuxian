@@ -414,7 +414,7 @@
     // player 保留：名字/輪迴四件套/新身份/新靈根；其餘回默認
     const keepPlayer = {
       name: p.name, reincarn: p.reincarn, talents: p.talents || {}, rp: p.rp,
-      identity: ident.id, spiritRoot: newRoot, tribFails: 0, gender: null,
+      identity: ident.id, spiritRoot: newRoot, tribFails: 0, gender: null, school: null,
     };
     st.player = Object.assign(def.player, keepPlayer);
     st.res = { lingShi: 0, lingYu: keepLingYu };   // 靈石清空，靈玉×保留比例

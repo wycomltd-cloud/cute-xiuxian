@@ -50,3 +50,14 @@ forge.disposalInfo(uid) 回傳 mat/gems/marketLingYu/lingYu/buyerName/recycleErr
 ## Cute v1.7 女主角長髮與丹藥出售
 女主角十境界素材改為 assets/genders/female/00-lianqi.webp 至09-feisheng.webp，選角、首頁與相機使用相同長髮版本；男主角素材不變。
 alchemy.saleInfo(pillId) 回傳 {id,name,craftLingShi,price,count}|null，price=floor(原丹方 cost.lingShi×0.6)；sellPill(pillId)每次扣1顆並給靈石，返回{ok,msg,price?}。普通與_star極品同價；未知丹方、無庫存拒售，不受丹毒、境界、未習得丹方影響。不觸發藥效、經驗或丹毒。透過addRes一次結算；確認彈窗預覽單價，可取消。升版公告內容與快取同步為1.7。
+
+
+## Cute v1.8 本世五修與整數結算
+player.school=null|'jian'|'fu'|'zhen'|'dan'|'ti'為本世修行唯一來源。character.choose(gender,school)原子選定兩者；已有有效性別不可改，未選school舊檔補選一次，已選school不可改；needsChoice任一未選即true。成功輪回清空兩者，失敗保留。舊pvp.school不再採用，pvp.setSchool舊API固定false。所有功能仍照常開放，修行影響論劍流派，非系統解鎖限制。
+循環劍→符→陣→丹→體→劍；pvp.counterBonus(my,opp)按有向距離0..4回傳[0,20,10,-10,-20]。僅玩家戰力乘(1+bonus/100)，對手維持原戰力，三局兩勝與隨機規則不變。結果含counterPct/playerPower/adjustedPlayerPower/opponentPower，戰報保留修行與修正。UI預估、對戰預覽與結果使用同一函數；五修列改純展示。
+奇遇結果中的修為、靈石、靈玉與丹毒以Math.round後完整整數加千分位顯示，不使用帶小數的萬/億縮寫，不改實際資源與丹毒精度。
+
+
+## Cute v1.8.5 五修境界法器插畫
+新增js/ui/school-art.js，在realm-art之後、scene-photo與scene之前載入。schoolArt.info(school,realmIdx)返回{school,level,key,name,colors}|null；render返回純SVG法器插畫層或空字串。五修各十境，共50種法器設計：劍刃/劍鍔/伴劍，符紙/符籙數量，陣法邊數/環層/陣眼，丹爐/爐煙/丹珠，體修護甲/氣環隨境改變。沿用男女20張境界插畫，形成100種性別×境界×五修組合，不更改性別、修行或遊戲數值，不加入柔焦。
+scene首頁使用與原畫相同3:2 SVG座標並同步cover裁切；法器只按已顯示成功的境界切換，避免載入競態。相機開啟固定src、性別畫面、school與realmIdx，一起顯示法器，隱藏操作時保留法器與完整風景。無任何新增存檔欄位或數值加成。

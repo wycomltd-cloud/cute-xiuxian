@@ -9,7 +9,7 @@
     return {
       ver: 1, createdAt: now, lastSeen: now, totalOnlineSec: 0,
       player: {
-        name: '摸魚小散仙', gender: null, realmIdx: 0, layer: 1, cult: 0, // cult=當前累積修為(用於突破消耗)
+        name: '摸魚小散仙', gender: null, school: null, realmIdx: 0, layer: 1, cult: 0, // cult=當前累積修為(用於突破消耗)
         breakFails: 0, cultivateMode: 'dazuo',            // dazuo打坐|biguan閉關|dunwu頓悟
         spiritRoot: { type: 'jin', grade: 3, mut: null }, // 五行 + 變異(null|bing|lei|feng|an|guang|hundun)
         meridians: { lit: [] },                           // 已點亮穴位 id 列表

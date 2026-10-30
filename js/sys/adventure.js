@@ -373,6 +373,9 @@
     return currRate / baseRate;
   }
 
+  // 結果彈窗以完整整數顯示，不改動實際獎勵與丹毒精度。
+  function resultInt(n) { return Math.round(n).toLocaleString('en-US'); }
+
   /* ---------------- out 結算 ---------------- */
   function settleOut(e, choice, result) {
     const out = choice.out || {};
@@ -383,7 +386,7 @@
     const scale = rewardScale(e);
     const sc = function (v) { return Math.max(1, Math.floor((v || 0) * scale)); };
 
-    if (out.cult) { const v = sc(out.cult); giveCult(v, src); rw.cult = (rw.cult || 0) + v; msg.push('修為 +' + XG.util.fmt(v)); }
+    if (out.cult) { const v = sc(out.cult); giveCult(v, src); rw.cult = (rw.cult || 0) + v; msg.push('修為 +' + resultInt(v)); }
     if (out.lingShi || out.lingYu || out.mat || out.pill || out.egg) {
       const d = {};
       const ls = out.lingShi ? sc(out.lingShi) : 0;
@@ -394,8 +397,8 @@
       if (out.pill) d.pill = out.pill;
       if (out.egg) d.egg = out.egg;
       XG.addRes(d);
-      if (ls) { rw.lingShi = (rw.lingShi || 0) + ls; msg.push('靈石 +' + XG.util.fmt(ls)); }
-      if (ly) { rw.lingYu = (rw.lingYu || 0) + ly; msg.push('靈玉 +' + XG.util.fmt(ly)); }
+      if (ls) { rw.lingShi = (rw.lingShi || 0) + ls; msg.push('靈石 +' + resultInt(ls)); }
+      if (ly) { rw.lingYu = (rw.lingYu || 0) + ly; msg.push('靈玉 +' + resultInt(ly)); }
       if (out.mat) { rw.mat = rw.mat || {}; for (const id in out.mat) { rw.mat[id] = (rw.mat[id] || 0) + out.mat[id]; msg.push(matName(id) + '×' + out.mat[id]); } }
       if (out.pill) { rw.pill = rw.pill || {}; for (const id in out.pill) { rw.pill[id] = (rw.pill[id] || 0) + out.pill[id]; msg.push(pillName(id) + '×' + out.pill[id]); } }
       if (out.egg) { rw.egg = (rw.egg || 0) + out.egg; msg.push('靈寵蛋 +' + out.egg); }
@@ -413,7 +416,7 @@
       p.toxicity = XG.util.clamp(old + out.toxicity, 0, 100); // 正加負減，clamp 0~100
       const real = p.toxicity - old;
       rw.toxicity = (rw.toxicity || 0) + real;
-      if (real) msg.push(real > 0 ? '丹毒 +' + real : '丹毒 ' + real);
+      if (real) msg.push(real > 0 ? '丹毒 +' + resultInt(real) : '丹毒 ' + resultInt(real));
       XG.bus.emit('res:changed');
     }
     if (out.rootWash) {

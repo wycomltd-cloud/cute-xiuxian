@@ -50,3 +50,11 @@ html,body{background:#f7f7ee;color:var(--ink);font:14px/1.7 var(--font-kai)}body
 
 /* 裝備操作固定三欄，手機上也保持橫排。 */
 .cute-equip-actions{display:flex;flex-wrap:nowrap!important;gap:6px}.cute-equip-actions .btn{flex:1;min-width:0;padding:10px 4px!important;font-size:14px!important;white-space:nowrap}
+
+/* 本世修行選擇與論劍修正說明。 */
+.character-school-title{font-size:17px;color:#526e49;margin:20px 0 10px}.character-school-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.character-school-card{border:2px solid #e2e8d7;border-radius:13px;background:#fafbf2;padding:12px 3px;cursor:pointer;font-size:20px;color:#617653}.character-school-card strong{display:block;font-size:13px;margin-top:5px}.character-school-card.selected{border-color:#89a66e;background:#eaf1dd;box-shadow:0 0 0 2px #cbdaba66}.character-school-hint{font-size:11px!important;line-height:1.8;margin-top:10px!important}.character-choice-card:disabled{cursor:default;opacity:.8}.character-choice-card:disabled.selected{opacity:1}.cute-school-matchups{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}.cute-school-matchups>span{padding:5px 9px;border:1px solid #dfe5d3;border-radius:10px;background:#fafcf3;font-size:13px}.tbb-ring-node{cursor:default!important}
+
+/* 五修法器：與原畫相同座標與裁切，保留清晰背景；不攔截點擊。 */
+.cute-scene-school-art,.cute-photo-school-art{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}.cute-school-art{display:block;width:100%;height:100%;overflow:hidden}.cute-scene-school-art{animation:cuteSchoolAppear .55s ease-out}.cute-photo-school-art{animation:none}
+@keyframes cuteSchoolAppear{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.cute-scene-school-art{animation:none}}

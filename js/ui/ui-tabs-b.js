@@ -963,7 +963,7 @@
     } else {
       o.pending.forEach((p) => {
         h += '<div class="tbb-log-item">' + esc(p.season) + ' · ' + esc(p.tierName)
-          + ' <span class="tbb-sp"></span><span style="color:var(--gold-d)">靈玉 ' + p.lingYu + '、殘篇 ' + p.frags + '</span></div>';
+          + ' <span class="tbb-sp"></span><span style="color:var(--gold-d)">靈玉 ' + p.lingYu + '、殘篇 ' + (typeof p.frags === 'object' ? Object.values(p.frags || {}).reduce(function (a, n) { return a + n; }, 0) : (p.frags || 0)) + '</span></div>';
       });
     }
     h += '</div>';
@@ -974,9 +974,8 @@
     const me = myPower();
     if (!me || !opp || !opp.power) return 0.5;
     let a = me, b = opp.power;
-    const mySch = pv.mySchool;
-    if (mySch && COUNTER[mySch] === opp.school) a *= 1.15;
-    else if (mySch && COUNTER[opp.school] === mySch) b *= 1.15;
+    const mySch = pvpSys().getSchool().id;
+    a *= 1 + pvpSys().counterBonus(mySch, opp.school) / 100;
     return a / (a + b);
   }
 
@@ -1007,7 +1006,7 @@
         + (o.relation === 'partner' ? '<span class="tbb-tag-yin">道侶</span>' : '')
         + (o.relation === 'friend' ? '<span class="tbb-tag-yin">摯友</span>' : '')
         + '</div><div class="card-sub" style="margin:4px 0">戰力 ' + fmt(o.power)
-        + ' · 預估勝率 <b style="color:' + (wp >= 0.5 ? 'var(--qing-d)' : 'var(--danger)') + '">' + pct(wp) + '</b></div>'
+        + ' · 我方流派修正 ' + (s.counterBonus(s.getSchool().id, o.school) > 0 ? '+' : '') + s.counterBonus(s.getSchool().id, o.school) + '% · 預估勝率 <b style="color:' + (wp >= 0.5 ? 'var(--qing-d)' : 'var(--danger)') + '">' + pct(wp) + '</b></div>'
         + '<div class="tbb-rowline"><button class="btn btn-primary" data-act="pvp-fight">開戰</button>'
         + '<button class="btn btn-ghost" data-act="pvp-match">另尋對手</button></div></div>'
         + '<div id="tbb-pvp-rounds" style="text-align:center;margin-top:8px"></div>'
@@ -1031,20 +1030,16 @@
     let cur;
     try { cur = s.getSchool ? s.getSchool() : null; } catch (e) { cur = null; }
     pv.mySchool = cur ? cur.id : null;
-    const counterMe = pv.mySchool ? COUNTER[pv.mySchool] : null;
-    let counteredBy = null;
-    if (pv.mySchool) for (const k in COUNTER) if (COUNTER[k] === pv.mySchool) counteredBy = k;
     let h = '<div class="tbb-ring">';
-    schoolList().forEach((sc, i) => {
+    ['jian','fu','zhen','dan','ti'].forEach(function (id, i) {
       if (i > 0) h += '<span class="tbb-ring-arrow">→</span>';
-      h += '<span class="tbb-ring-node' + (cur && cur.id === sc.id ? ' tbb-ring-on' : '') + '" data-act="pvp-sch" data-id="' + esc(sc.id) + '">'
-        + esc(sc.icon || '') + ' ' + esc(sc.name) + '</span>';
+      h += '<span class="tbb-ring-node' + (cur && cur.id === id ? ' tbb-ring-on' : '') + '">' + esc(schoolName(id)) + '</span>';
     });
-    h += '<span class="tbb-ring-arrow">↺</span></div>'
-      + '<div class="muted" style="text-align:center;margin-top:4px">剋制環循環相剋，克敵一方戰力 +15%。當前：'
-      + (cur ? '<b style="color:var(--gold-d)">' + esc(cur.name) + '</b>'
-        + (counterMe ? '（克 ' + esc(schoolName(counterMe)) + '，忌 ' + esc(schoolName(counteredBy)) + '）' : '')
-        : '未擇流派') + '</div>';
+    h += '<span class="tbb-ring-arrow">↺</span></div><p class="muted" style="text-align:center">本世專修：<b>' + esc(cur.name) + '</b>（成功輪回後可重選）</p>';
+    h += '<div class="cute-school-matchups">' + ['jian','fu','zhen','dan','ti'].map(function (id) {
+      const bonus = s.counterBonus(cur.id, id);
+      return '<span>對' + esc(schoolName(id)) + ' <b>' + (bonus > 0 ? '+' : '') + bonus + '%</b></span>';
+    }).join('') + '</div><p class="muted" style="text-align:center">依循環距離調整我方戰力：順向 +20%／+10%，反向 −20%／−10%，同修 0%。</p>';
     z.innerHTML = h;
   }
 
@@ -1116,8 +1111,7 @@
         h += '　<span class="tbb-pts-jump" style="color:' + (res.delta >= 0 ? 'var(--qing-d)' : 'var(--danger)') + '">'
           + (res.delta >= 0 ? '+' : '') + res.delta + ' 分</span></div>';
         const tags = [];
-        if (res.counter === 'win') tags.push('流派相剋，順勢 +15%');
-        if (res.counter === 'lose') tags.push('流派被克，逆勢苦戰');
+        tags.push('本世修行：我方戰力 ' + (res.counterPct > 0 ? '+' : '') + (res.counterPct || 0) + '%');
         if (res.tierUp) tags.push('段位晉升！');
         if (res.tierDown) tags.push('段位跌落……');
         if (res.upset) tags.push('越階挑戰，額外 +5 分');

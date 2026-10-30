@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const XG = window.XG = window.XG || {};
-  let root = null, scene = null, unsubs = [], count = 0;
+  let root = null, scene = null, unsubs = [], count = 0, schoolKey = null;
   let requestedArt = null, displayedArt = null, loadSerial = 0, retryAt = 0, failedArt = null;
   const preloaded = new Set();
   const sayings = ['今天的努力，先從坐好開始。', '靈氣吸進來，煩惱吐出去。', '別看我在發呆，我在載入仙氣。', '師父說要放下。我先放下工作。', '離飛升還很遠，離午睡很近。', '坐得住，也是另一種超能力。', '修為慢慢長，肚子不能餓。', '我的道心很穩，除了開飯的時候。'];
@@ -10,7 +10,7 @@
   function cleanup() {
     unsubs.forEach(function (f) { if (typeof f === 'function') f(); });
     unsubs = []; root = scene = null; requestedArt = displayedArt = null;
-    retryAt = 0; failedArt = null; loadSerial++; // 離開分頁後，舊圖片完成載入也不可覆寫新場景。
+    retryAt = 0; failedArt = null; schoolKey = null; loadSerial++; // 離開分頁後，舊圖片完成載入也不可覆寫新場景。
   }
 
   function describe(art) {
@@ -26,6 +26,23 @@
     badge.title = art.outfit;
     scene.style.setProperty('--cute-realm-color', art.color);
     scene.dataset.realm = art.id; scene.dataset.gender = art.gender;
+  }
+
+  // 法器依「已顯示的境界」切換，避免新插畫尚未載入就配上下一境的法器。
+  function syncSchool() {
+    if (!scene || !XG.schoolArt) return;
+    const level = Math.max(0, XG.cfg.REALMS.findIndex(function (r) { return r.id === scene.dataset.realm; }));
+    const school = XG.state.player.school;
+    const info = XG.schoolArt.info(school, level), key = info ? info.key : '';
+    if (key === schoolKey) return;
+    const box = scene.querySelector('.cute-scene-school-art');
+    if (box) box.innerHTML = XG.schoolArt.render(school, level);
+    schoolKey = key; scene.dataset.school = info ? info.school : '';
+    scene.dataset.schoolLevel = String(level);
+    const badge = scene.querySelector('#cute-scene-place');
+    const art = XG.sceneArt.forRealm(level, scene.dataset.gender);
+    badge.textContent = XG.cfg.REALMS[level].name + '・' + (info ? info.name : art.scene);
+    badge.title = art.scene + '・' + art.outfit + (info ? '・' + info.name : '');
   }
 
   function preloadNext(art) {
@@ -52,7 +69,7 @@
       finished = true; retryAt = 0; failedArt = null;
       const changed = displayedArt !== null && displayedArt !== art.key;
       img.src = art.src; img.alt = describe(art); img.title = art.outfit;
-      setCaption(art); displayedArt = art.key;
+      setCaption(art); displayedArt = art.key; schoolKey = null; syncSchool();
       scene.classList.remove('is-changing');
       if (changed) {
         void scene.offsetWidth; scene.classList.add('is-changing');
@@ -75,11 +92,12 @@
   function mount(el) {
     cleanup(); root = el;
     const art = XG.sceneArt.forRealm(XG.state.player.realmIdx, XG.state.player.gender);
-    el.innerHTML = '<div class="cute-scene"><img class="cute-scene-art" src="' + XG.util.esc(art.src) + '" alt="' + XG.util.esc(describe(art)) + '" width="1536" height="1024"><button class="cute-scene-camera" aria-label="查看乾淨完整圖片" title="仙界照相館：只留可愛，不留按鈕"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h4l1.5-2h5L16 7h4a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="4"/></svg></button><div class="cute-scene-top"><span class="cute-scene-badge" id="cute-scene-mode">仙氣自動補貨中</span><span class="cute-scene-badge" id="cute-scene-place"></span></div><span class="cute-sparkle s1">✦</span><span class="cute-sparkle s2">✧</span><span class="cute-sparkle s3">✦</span><button class="cute-person-hit" aria-label="點小仙人吐納靈氣"></button><button class="cute-adventure" hidden>✨ 奇遇來敲門</button><div class="cute-scene-pets"></div><div class="cute-scene-bottom"><div class="cute-scene-speech" id="cute-scene-speech"></div><button class="cute-tap-btn">戳我一下，吸口仙氣 <small>＋20秒修為</small></button></div></div>';
+    el.innerHTML = '<div class="cute-scene"><img class="cute-scene-art" src="' + XG.util.esc(art.src) + '" alt="' + XG.util.esc(describe(art)) + '" width="1536" height="1024"><div class="cute-scene-school-art" aria-hidden="true"></div><button class="cute-scene-camera" aria-label="查看乾淨完整圖片" title="仙界照相館：只留可愛，不留按鈕"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h4l1.5-2h5L16 7h4a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="4"/></svg></button><div class="cute-scene-top"><span class="cute-scene-badge" id="cute-scene-mode">仙氣自動補貨中</span><span class="cute-scene-badge" id="cute-scene-place"></span></div><span class="cute-sparkle s1">✦</span><span class="cute-sparkle s2">✧</span><span class="cute-sparkle s3">✦</span><button class="cute-person-hit" aria-label="點小仙人吐納靈氣"></button><button class="cute-adventure" hidden>✨ 奇遇來敲門</button><div class="cute-scene-pets"></div><div class="cute-scene-bottom"><div class="cute-scene-speech" id="cute-scene-speech"></div><button class="cute-tap-btn">戳我一下，吸口仙氣 <small>＋20秒修為</small></button></div></div>';
     scene = el.firstElementChild; setCaption(art);
     scene.querySelector('.cute-scene-camera').addEventListener('click', function () {
+      syncSchool();
       const img = scene.querySelector('.cute-scene-art');
-      if (XG.ui.openScenePhoto) XG.ui.openScenePhoto({ src: img.getAttribute('src'), alt: img.alt });
+      if (XG.ui.openScenePhoto) XG.ui.openScenePhoto({ src: img.getAttribute('src'), alt: img.alt, school: scene.dataset.school, realmIdx: Number(scene.dataset.schoolLevel) });
     });
     scene.querySelector('.cute-person-hit').addEventListener('click', tap);
     scene.querySelector('.cute-tap-btn').addEventListener('click', tap);
@@ -108,7 +126,7 @@
 
   function sync() {
     if (!scene) return;
-    updateArt(false);
+    updateArt(false); syncSchool();
     const p = XG.state.player, dw = XG.sys.cultivation.getDunwuInfo(), big = p.cultivateMode === 'biguan';
     scene.classList.toggle('is-biguan', big); scene.classList.toggle('is-dunwu', !!dw.active);
     scene.querySelector('#cute-scene-mode').textContent = dw.active ? '靈感插隊！頓悟 ×5' : big ? '認真躺平中 · 修煉 ×2' : '仙氣自動補貨中';
