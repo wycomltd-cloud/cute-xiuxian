@@ -3,7 +3,7 @@
   'use strict';
   const XG = window.XG;
   const B = XG.balance = {
-    version: '1.9.2',
+    version: '1.9.3',
     targetHours: [1/3,24,48,96,120,144,168,192,216],
     exploreHourly: [300,1000,3000,8000,20000,40000,70000,110000,160000,160000],
     petGradeMult: [1,1,1.4,1.8,2.3,3],
@@ -49,7 +49,8 @@
       const lots=this.pillLots(id);let left=n;
       while(left>0&&lots.length){const take=Math.min(left,lots[0].n);lots[0].n-=take;left-=take;if(!lots[0].n)lots.shift();}
     },
-    pillSaleQuote(id,r) {
+    // 送禮估值沿用既有規則；玩家出售一律另用 pillSale(r) 的固定基準。
+    pillGiftQuote(id,r) {
       const lots=this.pillLots(id),base=this.pillSale(r);
       return {price:lots.length?Math.min(base,Math.floor(lots[0].paidStone*.6)):base,capped:lots.length>0};
     },

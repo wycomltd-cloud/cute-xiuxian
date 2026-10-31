@@ -26,12 +26,12 @@ function fighter(x){Object.assign(x.state.player,{realmIdx:2,layer:5,gender:'mal
  const r=x.data.pills.recipes.find(r=>r.id==='pill_xuanzhi'),A=x.sys.alchemy;
  // Mixed legacy and bought inventory: newly bought lots are consumed first by every resource path.
  x.state.inv.pill[r.id]=2;x.state.fellowMarket.slots=[{sid:'cheap',kind:'pill',id:r.id,name:r.name,n:3,cur:'lingShi',price:10}];
- ok(x.sys.fellows.buyMarket('cheap').ok,'buy discounted pill');eq(A.saleInfo(r.id).price,6,'resale actual paid cap');const before=x.state.res.lingShi;ok(A.sellPill(r.id).ok,'discount sell');eq(x.state.res.lingShi,before+6,'actual capped payout');eq(A.saleInfo(r.id).price,3600,'legacy item retains original return');
- ok(x.sys.fellows.buyMarket('cheap').ok,'second discounted pill');x.save.save();x.save.load();eq(A.saleInfo(r.id).price,6,'acquisition metadata saved');
+ ok(x.sys.fellows.buyMarket('cheap').ok,'buy discounted pill');eq(A.saleInfo(r.id).price,3600,'resale fixed original basis');const before=x.state.res.lingShi;ok(A.sellPill(r.id).ok,'discount sell');eq(x.state.res.lingShi,before+3600,'actual fixed payout');eq(A.saleInfo(r.id).price,3600,'legacy item retains original return');
+ ok(x.sys.fellows.buyMarket('cheap').ok,'second discounted pill');x.save.save();x.save.load();eq(A.saleInfo(r.id).price,3600,'saved acquisition cost does not cap resale');
  ok(A.usePill(r.id).ok,'consume bought lot');eq(A.saleInfo(r.id).price,3600,'consumed lot no stale cap');
  ok(x.sys.fellows.buyMarket('cheap').ok,'third discounted pill');const uid=x.state.fellows[0].uid;ok(x.sys.fellows.sendGift(uid,'pill',r.id).ok,'gift consumes purchased lot');eq(A.saleInfo(r.id).price,3600,'gift no stale metadata');
  const b=x.data.equips.bases.find(b=>!b.hidden),E=x.sys.forge,gear=E.createEquip(b.id,b.grade);gear.marketPaidStone=100;
- eq(E.disposalInfo(gear.uid).lingYu,0,'equipment low paid cap');ok(E.sell(gear.uid).ok,'zero return explicitly supported');ok(!E.sell(gear.uid).ok,'no duplicate sale');
+ eq(E.disposalInfo(gear.uid).lingYu,Math.floor(x.balance.equipYu(gear.grade)*.6),'equipment fixed original basis');ok(E.sell(gear.uid).ok,'equipment sells at standard return');ok(!E.sell(gear.uid).ok,'no duplicate sale');
 }
 {
  const g=game(),{x}=g;fighter(x);const F=x.sys.fellows;const oldPick=x.util.pick;x.util.pick=function(arr){return arr.includes('lingShi')?'lingShi':oldPick.call(this,arr);};let f=x.state.fellows[0],other=x.state.fellows[1];f.favor=0;const uid=f.uid;x.state.inv.pill.pill_juqi=101;

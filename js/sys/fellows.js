@@ -970,7 +970,7 @@
       for(const id in st.inv.pill) {
         if(st.inv.pill[id]<=0)continue;const base=id.replace(/_star$/,'');
         const r=XG.data.pills.recipes.find(r=>r.id===base);if(!r)continue;
-        out.push({kind:'pill',id:id,name:r.name+(base!==id?'·極品':''),count:st.inv.pill[id],value:B.pillSaleQuote(id,r).price});
+        out.push({kind:'pill',id:id,name:r.name+(base!==id?'·極品':''),count:st.inv.pill[id],value:B.pillGiftQuote(id,r).price});
       }
       const ids=new Set(Object.keys(st.gongfa.frag||{}).concat(Object.keys(st.inv.frag||{})));
       for(const id of ids) {
@@ -1106,7 +1106,7 @@
       XG.addRes({lingYu:-info.cost});
       XG.balance.daily().marketRefreshes=info.used+1;
       genMarket(Date.now(),info.used+1);
-      return {ok:true,cost:info.cost,msg:'第'+(info.used+1)+'次換新完成！本批全品項按原價加'+Math.round(XG.balance.marketMarkup(info.used+1)*100)+'%，今日尚餘'+(info.left-1)+'次。'};
+      return {ok:true,cost:info.cost,msg:'坊市已換新。'};
     },
 
     /* -------- 道侶 -------- */

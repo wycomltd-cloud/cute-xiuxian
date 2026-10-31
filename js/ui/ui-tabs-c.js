@@ -415,22 +415,6 @@
   };
 
   /* ==================== 二、坊市 tab ==================== */
-  // 由 marketRules 基準價推算「原價」（性格/關係浮動前），用於劃線對比
-  function marketBase(s) {
-    const mr = (XG.data && XG.data.world && XG.data.world.marketRules) || {};
-    const bp = (mr.stock && mr.stock.basePrice) || {};
-    if (s.kind === 'recipe') return (s.grade || 1) * 3; // 丹方欄為靈玉固定價，無劃線對比
-    let b = 0;
-    if (s.kind === 'pill') b = (bp.pillPerGrade || 200) * (s.grade || 1);
-    else if (s.kind === 'mat') b = bp['matG' + (s.grade || 0)] || 100;
-    else if (s.kind === 'equip') b = (bp.equipPerGrade || 800) * Math.max(1, s.grade || 0);
-    else if (s.kind === 'frag') b = (bp.fragPerGrade || 1500) * (s.grade || 1);
-    else b = bp.egg || 3e4;
-    if (s.cur === 'lingYu') b = Math.max(1, Math.round(b / 500));
-    else b = Math.max(1, Math.round(b));
-    return b;
-  }
-
   function renderMarket(el) {
     const body = R(el, 'body');
     if (!body) return;
@@ -442,14 +426,12 @@
     if (!m || !m.unlocked) { body.innerHTML = lockHtml('坊市未開，築基 5 層後再來。'); return; }
 
     const lingYu = (XG.state && XG.state.res && XG.state.res.lingYu) || 0;
-    let html = '<div class="card"><div class="row" style="justify-content:space-between">'
-      + '<div>今日換新：<b>'+m.refreshUsed+' / 5</b><div class="muted">每日免費首批；不再每10分鐘自動換新。距每日重置 '+fmtTime(m.nextInSec)+'</div></div>'
-      + '<button class="btn btn-primary" data-act="m-refresh"' + (m.refreshLeft>0&&lingYu>=m.refreshCost ? '' : ' disabled') + '>'+(m.refreshLeft>0?'靈玉×'+m.refreshCost+' 換新（餘'+m.refreshLeft+'次）':'今日換新已用完')+'</button>'
-      + '</div><p class="muted">換新費用5／10／20／40／80靈玉；付費換新整批加價：第1次+20%、第2次+30%、第3次+40%、第4／5次+50%。坊市購得物品沿用實付價六成回收上限。</p><p class="muted">本批依生成時境界與戰力估價；提高實力後，下次換新可出現更高級商品。</p></div>';
+    let html = '<div class="card"><button class="btn btn-primary" data-act="m-refresh"'
+      + (m.refreshLeft>0&&lingYu>=m.refreshCost?'':' disabled')+'>'
+      + (m.refreshLeft>0?'換新 · '+m.refreshCost+' 靈玉':'今日換新已用完')+'</button></div>';
     if (!m.slots || !m.slots.length) html += '<div class="card xtc-lock">今日坊市冷清，暫無貨色。</div>';
     html += '<div class="grid grid-2">';
     (m.slots || []).forEach(function (s) {
-      const base = s.basePrice||marketBase(s);
       const g = gradeTxt(s.kind, s.grade);
       html += '<div class="card" style="margin-bottom:0">'
         + '<div class="xtc-mrow"><span>賣家 · ' + esc(s.sellerName) + '</span><span class="xtc-tag">' + esc(personaName(s.persona)) + '</span></div>'
@@ -457,10 +439,7 @@
         + '<div style="min-width:0"><b>' + esc(s.name) + '</b>' + (g ? '<div class="muted">' + esc(g) + '</div>' : '') + '</div></div>'
         + (s.line ? '<div class="muted" style="font-size:12px">' + esc(s.line) + '</div>' : '')
         + '<div style="margin:4px 0">'
-        + (base && base > s.price ? '<span class="xtc-old">' + fmt(base) + '</span>' : '')
-        + (s.markup>0?'<span class="xtc-tag">原價 '+fmt(s.originalPrice)+' '+esc(s.curName)+' ＋'+Math.round(s.markup*100)+'%</span> ':'')
         + '<span class="xtc-price">' + fmt(s.price) + '</span> <span class="muted">' + esc(s.curName) + '</span>'
-        + (base && base < s.price ? '<span class="muted" style="font-size:12px">（本批統一加價）</span>' : '')
         + (s.kind==='pill'?'<div class="muted">今日還可購買 '+s.dailyLeft+' 顆（同品項每日3顆，刷新不重置）</div>':'')
         + '<span class="muted" style="float:right">餘量 ×' + fmtInt(s.n) + '</span></div>'
         + '<button class="btn btn-primary" style="width:100%" data-act="m-buy" data-sid="' + esc(s.sid) + '"'
@@ -1095,7 +1074,7 @@
       + '<label class="row" style="cursor:pointer"><input type="checkbox" data-act="st-news"' + (st.newsCollapsed ? ' checked' : '') + '> 摺疊頂部傳聞滾動條</label></div>';
 
     html += '<div class="card"><h3 class="card-title">ℹ️ 關於</h3>'
-      + '<div class="xtc-kv"><span>版本</span><b>摸魚修仙 Cute v1.9.2（存檔 ver ' + ((XG.state && XG.state.ver) || 1) + '）</b></div>'
+      + '<div class="xtc-kv"><span>版本</span><b>摸魚修仙 Cute v1.9.3（存檔 ver ' + ((XG.state && XG.state.ver) || 1) + '）</b></div>'
       + '<div class="xtc-kv"><span>本世主角</span><b>' + genderBadge((XG.state.player || {}).gender) + ' ' + esc(XG.character.label((XG.state.player || {}).gender)) + '主角</b></div><div class="muted">成功輪回後可重新選擇性別。</div>'
       + '<div class="card-sub" style="margin:6px 0 4px">系統解鎖進度一覽</div>'
       + '<p class="cute-about">原作：shanawakiminouso-hub／xiuxian-idle，MIT 授權。可愛插畫與介面為本版新增。<a href="LICENSE" target="_blank">查看授權</a> · <a href="CUTE-README.md" target="_blank">遊戲說明</a></p><div data-r="stunlock">' + unlockListHtml() + '</div></div>';
