@@ -340,7 +340,7 @@
         if (r) return true; // 習得新丹方
       } catch (e) { /* 降級 */ }
     }
-    XG.addRes({ lingShi: 500 * (maxLv || 1) });
+    XG.addRes({ lingShi: XG.balance.activityStone(500 * (maxLv || 1)) });
     return false;
   }
   // 殘篇發放（防禦性：gongfa 未註冊則塞揹包 inv.frag）
@@ -415,7 +415,7 @@
       const rareScale = Math.min(1, opt.sec / 3600);
       if (map.sp && XG.util.chance(rareScale)) {
         report.mat[map.sp] = (report.mat[map.sp] || 0) + opt.sp;
-        const ly = opt.sp; // 每件特產折 1 靈玉
+        const ly = XG.balance.activityJade(opt.sp); // 每件特產折 1 靈玉
         report.lingYu = (report.lingYu || 0) + ly;
       }
       // ---- 成品丹：品階權重抽 1 檔，品階池隨機 ----
@@ -465,6 +465,7 @@
     resDelta.mat = report.mat;
     resDelta.pill = report.pill;
     if (report.egg) resDelta.egg = report.egg;
+    if(resDelta.lingShi) resDelta.lingShi=XG.balance.activityStone(resDelta.lingShi);
     if (report.lingYu) resDelta.lingYu = report.lingYu;
     XG.addRes(resDelta);
 

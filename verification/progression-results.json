@@ -1,0 +1,29 @@
+[
+  {
+    "label": "每日登入兩次",
+    "loginsPerDay": 2,
+    "assumedPermanentCultPct": 10,
+    "assumedSameRealmPillsPerDay": 1,
+    "daysToHuashen": 6.51,
+    "realm": 4,
+    "sessions": 13
+  },
+  {
+    "label": "一般活躍",
+    "loginsPerDay": 6,
+    "assumedPermanentCultPct": 25,
+    "assumedSameRealmPillsPerDay": 1,
+    "daysToHuashen": 5.02,
+    "realm": 4,
+    "sessions": 30
+  },
+  {
+    "label": "頻繁登入",
+    "loginsPerDay": 24,
+    "assumedPermanentCultPct": 40,
+    "assumedSameRealmPillsPerDay": 2,
+    "daysToHuashen": 3.97,
+    "realm": 4,
+    "sessions": 95
+  }
+]

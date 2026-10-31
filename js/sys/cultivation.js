@@ -9,7 +9,7 @@
  *     mode:'dazuo|biguan', modeName, modeMult, locked(閉關鎖脈中), lockRemain(秒),
  *     dunwu:{ active, remain, mult, chancePerSec },
  *   }
- * 【模式切換】（打坐×1.0 / 閉關×2.0；入閉關即鎖脈 10 分鐘，鎖內不可切出；頓悟非模式不可手選）
+ * 【模式切換】（打坐×1.0 / 閉關×1.3；入閉關即鎖脈 2 分鐘，鎖內不可切出；頓悟非模式不可手選）
  *   getModeInfo()  → { mode, modeName, mult, modes:[{id,name,mult,desc}], locked, lockRemain }
  *   canSetMode(mode) → { can, err?, lockRemain? }
  *   setMode(mode)  → { ok, msg?, err?, lockRemain? }   // err 文案可直接 toast
@@ -41,8 +41,8 @@
  *   addCult(n, src)            // 發修為獎勵：加修為 + 屏幕跳字；src=來源文案（可省）
  *   addDunwuBoost(pct, durSec) // 悟性丹等：durSec 秒內頓悟觸發率 +pct%（alchemy 服悟性丹後調用）
  *   addRootWashBoost(pct, durSec) // 淬靈丹(eff root val=3)：durSec 秒內洗練變異率 +pct 百分點
- *   tuona()                    // 手動吐納（美術場景點擊小人調用）：全局 0.8s 冷卻，
- *                              // gain=當前 cultRate×20 → { ok:true, gain }；冷卻中 → { ok:false, cd(秒) }
+ *   tuona()                    // 手動吐納（美術場景點擊小人調用）：全局 3s 冷卻，
+ *                              // gain=當前 cultRate×5（每日100次後×0.1） → { ok:true, gain }；冷卻中 → { ok:false, cd(秒) }
  *
  * ============================ 寫入的 state.stats 鍵（snake，成就統計器讀） ============================
  *   total_cult(累計獲得修為) / news_count(本系統傳聞條數) / dunwu_count(頓悟次數)
@@ -69,7 +69,7 @@
   // ============================ 常量（數值紀律：口徑對齊契約 §5/§9.3） ============================
   const MODES = {
     dazuo:  { name: '打坐・發呆', mult: 1.0, desc: '表面在發呆，體內正在努力。基礎修煉 ×1。' },
-    biguan: { name: '閉關・認真躺', mult: 2.0, desc: '掛上請勿打擾，修煉 ×2；切換後鎖定兩分鐘，仙人也需要專注時間。' },
+    biguan: { name: '閉關・認真躺', mult: 1.3, desc: '掛上請勿打擾，修煉 ×1.3；切換後鎖定兩分鐘，仙人也需要專注時間。' },
   };
   const BIGUAN_LOCK_SEC = 120;   // 閉關鎖脈時長（秒）
   const DUNWU_DUR_SEC = 30;      // 頓悟持續（秒）
@@ -92,8 +92,8 @@
     for (let i = 1; i <= count; i++) waves.push({ i: i, name: BREAK_THUNDERS[i - 1], chance: Math.pow(rate, i / sum) });
     return waves;
   }
-  const TUONA_CD_MS = 800;       // 手動吐納全局冷卻（毫秒）
-  const TUONA_SEC = 20;          // 手動吐納單次收益 = 當前 cultRate × 秒數
+  const TUONA_CD_MS = 3000;       // 手動吐納全局冷卻（毫秒）
+  const TUONA_SEC = 5;          // 手動吐納單次收益 = 當前 cultRate × 秒數
 
   // 頓悟傳聞文案池（古風，隨機取一）
   const DUNWU_NEWS = [
@@ -346,7 +346,7 @@
       return n;
     },
 
-    // 手動吐納：全局 0.8s 冷卻；收益 = 當前 cultRate × 20 秒（走 addCult 統一入口）
+    // 手動吐納：全局 3s 冷卻；收益 = 當前 cultRate × 5 秒（走 addCult 統一入口）
     tuona() {
       const now = Date.now();
       if (now - tuonaLastAt < TUONA_CD_MS) {
@@ -354,7 +354,11 @@
       }
       tuonaLastAt = now;
       const rate = XG.stats ? XG.stats.get().cultRate : 0;
-      const gain = this.addCult(rate * TUONA_SEC, '吐納');
+      const d=XG.balance.daily();
+      const factor=(d.taps||0)<100?1:.1;
+      d.taps=(d.taps||0)+1;
+      const gain = this.addCult(rate * TUONA_SEC * factor, '吐納');
+      XG.bus.emit('save:dirty');
       bumpStat('tuona_count', 1);
       XG.bus.emit('tuona', { gain: gain }); // 美術場景監聽聯動
       return { ok: true, gain: gain };
@@ -416,7 +420,7 @@
       return { can: true };
     },
 
-    // 切換模式；切入閉關即鎖脈 10 分鐘（UI 提示接口：err/lockRemain/msg 直接展示）
+    // 切換模式；切入閉關即鎖脈 2 分鐘（UI 提示接口：err/lockRemain/msg 直接展示）
     setMode(mode) {
       const chk = this.canSetMode(mode);
       if (!chk.can) return { ok: false, err: chk.err, lockRemain: chk.lockRemain };

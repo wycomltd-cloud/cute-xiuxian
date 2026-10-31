@@ -382,8 +382,8 @@
     refreshSec: 600, // 每 600 秒（10 分鐘）自動刷新；耗靈玉 5 可立即刷新
     slots: 6,         // 6 欄貨位
     note: '每欄由在售道友（fellows 系統取其冗餘揹包物）掛售生成；先按 kindW 抽品類，再按玩家當前境界 ±1 品階抽具體貨。'
-        + '售價 = 基準價 × priceByPersona[賣家性格] × priceByRelation[與賣家關係]；回收價 = 基準價 × 0.4。'
-        + '同一貨品每日限購 3 件；若賣家為「歐皇」，其貨欄有小概率刷出超一階的貨（售價不變）——此乃坊市傳聞，信不信由你。',
+        + '售價 = 基準價 × priceByPersona[賣家性格] × priceByRelation[與賣家關係]；丹藥回收為煉製靈石六成，裝備回收為標準靈玉價六成；core/balance.js 統一估價與最低售價。'
+        + '同種成品丹每日限購 3 顆；若賣家為「歐皇」，其貨欄有小概率刷出超一階的貨（依新物品重新估價）——此乃坊市傳聞，信不信由你。',
     // 性格價格倍率（奸商 ×1.3，話癆好侃價 ×1.15，鹹魚懶得多要 ×0.9……）
     priceByPersona: {
       rexin: 0.95, gaoleng: 1.1, aojiao: 1.05, jianshang: 1.3, juanwang: 1.0,
@@ -396,7 +396,7 @@
       // 基準價（靈石；售價在此基礎上乘性格與關係倍率）
       basePrice: {
         matG0: 50, matG1: 300, matG2: 2e3, matG3: 1.5e4, matG4: 1e5, // 材料按 grade
-        pillPerGrade: 200,   // 成品丹 = 200 × 品階
+        pillPerGrade: 200,   // 舊版欄位；成品丹實價由 balance.pillPrice 按成本與材料估值計算
         equipPerGrade: 800,  // 裝備 = 800 × 品階
         fragPerGrade: 1500,  // 功法殘篇 = 1500 × 品階
         egg: 3e4,            // 靈寵蛋統一基準價

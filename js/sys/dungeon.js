@@ -287,8 +287,8 @@
   function grantLoot(loot) {
     const got = { lingShi: 0, lingYu: 0, mat: {}, pill: {}, frag: {}, egg: 0 };
     if (!loot) return got;
-    if (loot.lingShi) got.lingShi = rollNum(loot.lingShi);
-    if (loot.lingYu) got.lingYu = rollNum(loot.lingYu);
+    if (loot.lingShi) got.lingShi = XG.balance.activityStone(rollNum(loot.lingShi));
+    if (loot.lingYu) got.lingYu = XG.balance.activityJade(rollNum(loot.lingYu));
     if (loot.lingShi || loot.lingYu) XG.addRes({ lingShi: got.lingShi, lingYu: got.lingYu });
     // 材料表：按條目權重（第 3 元素 w）抽一種，數量在 [min,max] 內隨機
     if (loot.mat) {
@@ -414,7 +414,9 @@
     const cultSec = 60 + 12 * n;
     rw.cult = Math.floor((XG.stats.get().cultRate || XG.cfg.REALMS[XG.state.player.realmIdx].rate) *
       cultSec * (1 + rwPct('rwCultPct') / 100));
+    rw.lingShi=XG.balance.activityStone(rw.lingShi);
     XG.addRes({ lingShi: rw.lingShi });
+    rw.cult=XG.balance.activityCult(rw.cult);
     giveCult(rw.cult, '鎮妖塔第' + n + '層');
     // 材料（先於裝備 roll：降級發材料會併入 rw.mat，避免被覆蓋）
     rw.mat = rollTowerMats(n);
@@ -436,7 +438,7 @@
     // —— 隱藏 BOSS 追加厚賞：靈玉 + 必掉高 grade 裝備 + 高階殘篇×2 + 寶石箱 ——
     if (boss) {
       const round = bossRound(n);
-      rw.lingYu = 20 + 5 * round;
+      rw.lingYu = XG.balance.activityJade(20 + 5 * round);
       XG.addRes({ lingYu: rw.lingYu });
       // 必掉裝備 grade = min(2+輪次, 4)；grade≥4 時解鎖歸墟/龍淵隱藏神裝（第 2 輪起）
       const bg = U().clamp(2 + round, 1, 4);
@@ -519,7 +521,7 @@
 
     if (replay) {
       // 復刷：僅 1/3 靈石
-      const ls = Math.floor(rollNum(wave.reward.lingShi) / 3);
+      const ls = XG.balance.activityStone(Math.floor(rollNum(wave.reward.lingShi) / 3));
       XG.addRes({ lingShi: ls });
       ret.rewards = { lingShi: ls, lingYu: 0, mat: {}, pill: {}, frag: {}, egg: 0 };
     } else {
@@ -663,7 +665,7 @@
       perDay: SWEEP_PER_DAY,
       best: d.towerBest,
       canSweep: d.towerBest > 1 && (d.sweepFree > 0 || XG.hasRes({ lingYu: SWEEP_PAY })),
-      est: sweepEst(),
+      est: Object.assign({},sweepEst(),{lingShi:Math.min(sweepEst().lingShi,XG.balance.activityStoneRemaining()),cult:Math.min(sweepEst().cult,Math.floor(XG.balance.standardRate()*Math.max(0,14400-(XG.balance.daily().activitySec||0))))}),
     };
   }
 
@@ -681,6 +683,8 @@
       paid = true;
     }
     const est = sweepEst();
+    est.cult=XG.balance.activityCult(est.cult);
+    est.lingShi=XG.balance.activityStone(est.lingShi);
     XG.addRes({ lingShi: est.lingShi });
     giveCult(est.cult, '鎮妖塔掃蕩');
     // 掃蕩添頭：每 10 層贈 1 份鍛造材料 + 1 株煉丹靈草 + 1 份功法殘篇

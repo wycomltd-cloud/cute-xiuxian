@@ -2,10 +2,10 @@
  *
  * 玩法：對手池=state.fellows（道友）；匹配=玩家戰力±40% 篩選 + 強度貼近/宿敵偏好，無匹配時全表隨機；
  *      戰鬥自動結算：雙方戰力 × 流派克制（劍→符→陣→丹→體→劍，玩家依距離 +20%/+10%/0%/-10%/-20%）× 隨機 0.9~1.1，三局兩勝；
- *      週期=10 分鐘一輪，段位 pts 閾值：青銅0/白銀1200/黃金1500/白金1800/鑽石2100/仙尊2500；
+ *      週期=每日零時一輪，段位 pts 閾值：青銅0/白銀1200/黃金1500/白金1800/鑽石2100/仙尊2500；
  *      勝 +30 / 負 -15（按對手強度浮動）；連勝加成：2 連勝起每場勝利 +3 遞增、封頂 +30（敗北清零）；
  *      每日前 5 場發靈石+修為，之後僅 pts；戰報 history ≤20；
- *      每 10 分鐘按當前段位自動結算，發靈玉+隨機殘篇，進入可補領列表（不打也發基礎獎，不懲罰缺席）；
+ *      每日零時按當前段位自動結算，發靈玉+隨機殘篇，進入可補領列表（不打也發基礎獎，不懲罰缺席）；
  *      宿敵聯動：對手 relation==='rival' 時防禦性調 XG.sys.fellows.onRivalBattle(win, uid)，
  *      fellows 系統未就位時自行用 lines.war 文案池發戰書 news 兜底。
  *
@@ -66,14 +66,14 @@
   XG.sysOrder = XG.sysOrder || [];
 
   /* ---------------- 常量 ---------------- */
-  // 段位表（min=達到積分；yu=10分鐘週期結算靈玉；frags=10分鐘週期結算殘篇數）
+  // 段位表（min=達到積分；yu=每日結算靈玉；frags=每日結算殘篇數）
   const TIERS = [
     { id: 'qingtong', name: '青銅', min: 0,    yu: 0,  frags: 0 },
-    { id: 'baiyin',   name: '白銀', min: 1200, yu: 1,  frags: 0 },
-    { id: 'huangjin', name: '黃金', min: 1500, yu: 1,  frags: 1 },
-    { id: 'bojin',    name: '白金', min: 1800, yu: 2,  frags: 1 },
-    { id: 'zuanshi',  name: '鑽石', min: 2100, yu: 3,  frags: 1 },
-    { id: 'xianzun',  name: '仙尊', min: 2500, yu: 5,  frags: 2 },
+    { id: 'baiyin',   name: '白銀', min: 1200, yu: 2,  frags: 0 },
+    { id: 'huangjin', name: '黃金', min: 1500, yu: 4,  frags: 1 },
+    { id: 'bojin',    name: '白金', min: 1800, yu: 6,  frags: 1 },
+    { id: 'zuanshi',  name: '鑽石', min: 2100, yu: 9,  frags: 1 },
+    { id: 'xianzun',  name: '仙尊', min: 2500, yu: 12, frags: 2 },
   ];
   // 流派克制環：key 剋制 value（劍→符→陣→丹→體→劍），玩家依距離調整戰力
   const SCHOOL_RING = ['jian', 'fu', 'zhen', 'dan', 'ti'];
@@ -106,6 +106,7 @@
     if (typeof p.wins !== 'number') p.wins = 0;
     if (typeof p.losses !== 'number') p.losses = 0;
     if (typeof p.season !== 'string') p.season = '';
+    if(p.balanceVersion!=='1.9') { p.season=cycleId(); p.balanceVersion='1.9'; }
     if (typeof p.claimed !== 'string') p.claimed = '';
     if (!Array.isArray(p.history)) p.history = [];
     if (!Array.isArray(p.pending)) p.pending = [];       // 賽季待補領 [{season,tierId,tierName,lingYu,frags,t}]
@@ -217,9 +218,9 @@
     return hit ? hit.id : null;
   }
 
-  /* ---------------- 10 分鐘週期結算 ---------------- */
-  // 週期 id，每 10 分鐘一換（取代原來的周賽）
-  function cycleId() { return 'C' + Math.floor(Date.now() / 600000); }
+  /* ---------------- 每日週期結算 ---------------- */
+  // 週期 id，每日零時一換（取代原來的周賽）
+  function cycleId() { return 'D'+XG.balance.dayKey(); }
 
   // 跨週期檢測與結算：週期變更時按當前段位生成待補領獎勵（不打也發基礎獎，不懲罰缺席）
   function checkSeason() {
@@ -362,7 +363,7 @@
       const pl = XG.state.player;
       const realm = XG.cfg.REALMS[pl.realmIdx] || XG.cfg.REALMS[0];
       const baseRate = realm.rate * (1 + 0.12 * (pl.layer - 1)); // 境界基礎產出（不含外部加成，防速通）
-      const cult = Math.round(baseRate * (win ? 900 : 300) * XG.util.rand(0.9, 1.2)); // 勝≈15分鐘 / 負≈5分鐘
+      const cult = XG.balance.activityCult(Math.round(baseRate * (win ? 900 : 300) * XG.util.rand(0.9, 1.2))); // 勝≈15分鐘 / 負≈5分鐘
       const lingShi = Math.round(Math.pow(pl.realmIdx + 1, 1.5) * 200 * (win ? 1 : 0.4) * XG.util.rand(0.8, 1.3));
       grantCult(cult, win ? '論劍得勝' : '論劍惜敗');
       XG.addRes({ lingShi: lingShi });

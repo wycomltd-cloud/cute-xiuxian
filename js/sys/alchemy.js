@@ -420,6 +420,9 @@
     if (r.eff.type !== 'tox' && tox > TOX_BAN) {
       return { ok: false, msg: '丹毒攻心，百脈壅塞，無法再服丹藥——先服解毒丹！' };
     }
+    if (XG.balance.instantPill(r) && st.player.realmIdx<XG.balance.pillRealm(r)) {
+      return {ok:false,msg:'此丹藥力太熱情，須達'+XG.cfg.REALMS[XG.balance.pillRealm(r)].name+'才能服用。'};
+    }
     if (r.eff.type === 'break') {
       const seg = r.seg || [0, 8];
       if (st.player.realmIdx < seg[0] || st.player.realmIdx > seg[1]) {
@@ -430,13 +433,14 @@
       }
     }
 
+    const cultBefore=st.player.cult||0;
     XG.addRes({ pill: pillPair(pillId, -1) });
     const mult = star ? STAR_MULT : 1;
     const msg = applyPillEff(r, mult, star);
     if (r.tox) addTox(r.tox);
     if (XG.stats) XG.stats.invalidate();
     XG.bus.emit('save:dirty');
-    return { ok: true, msg: msg, star: star, eff: r.eff };
+    return { ok: true, msg: msg, star: star, eff: r.eff, actualCult:(st.player.cult||0)-cultBefore };
   }
 
   function applyPillEff(r, mult, star) {
@@ -452,8 +456,10 @@
           setBuff('cult', val, r.eff.dur);
           return '服下' + name + '，心若明鏡，' + XG.util.fmtTime(r.eff.dur) + '內修煉速度 +' + Math.round(val) + '%。';
         }
-        addCult(val, '服用' + name);
-        return '服下' + name + '，藥力化作精純修為（+' + XG.util.fmt(val) + '）。';
+        const gain=XG.balance.pillGain(r,star);
+        const d=XG.balance.daily(); d.pills=(d.pills||0)+1;
+        addCult(gain, '服用' + name);
+        return '服下' + name + '，藥力化作精純修為（+' + XG.util.fmt(gain) + '）。今日第'+d.pills+'顆修為丹。';
       case 'break':
         a.breakPills.push({ pillId: r.id, val: val, star: !!star });
         return '服下' + name + '，藥力沉入丹田蓄勢待發（突破成功率 +' + Math.round(val * 100) + '%，突破時生效）。';
@@ -884,6 +890,7 @@
       let usable = true;
       let reason = '';
       if (r.eff.type !== 'tox' && tox > TOX_BAN) { usable = false; reason = '丹毒>80，禁服'; }
+      else if (XG.balance.instantPill(r) && st.player.realmIdx<XG.balance.pillRealm(r)) { usable=false; reason='須達'+XG.cfg.REALMS[XG.balance.pillRealm(r)].name+'才可服用'; }
       else if (r.eff.type === 'break') {
         const seg = r.seg || [0, 8];
         if (st.player.realmIdx < seg[0] || st.player.realmIdx > seg[1]) { usable = false; reason = '境界不合'; }
@@ -894,7 +901,7 @@
         name: r.name + (star ? '·極品' : ''),
         icon: r.icon + (star ? '★' : ''),
         grade: r.grade, desc: r.desc,
-        effText: effText(r, star), tox: r.tox,
+        effText: effText(r, star)+(XG.balance.instantPill(r)?'；今日已服'+(XG.balance.daily().pills||0)+'顆，下顆實得修為 '+XG.util.fmt(XG.balance.pillGain(r,star))+'（藥效'+Math.round(XG.balance.pillFactor(XG.balance.daily().pills||0)*100)+'%）':''), tox: r.tox,
         usable: usable, reason: reason, count: count,
       };
     },

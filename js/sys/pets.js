@@ -127,7 +127,6 @@
   const TEAM_EXP_PS = function (g) { return (40 + 20 * g) * (1 + ((XG.state.player || {}).realmIdx || 0)); };   // 出戰經驗/秒（原基數為20+10g，現翻倍）
   const SL_EXP_PS = function (g) { return (80 + 40 * g) * (1 + ((XG.state.player || {}).realmIdx || 0)); };     // 獸欄經驗/秒（原基數為40+20g，現翻倍）
   const HERB_PER_H = 30;              // 靈田靈草期望株數/小時（基礎值）
-  const EXPLORE_LS_PS = 0.6;          // 探索靈石/秒 = 境界 rate × 0.6 × 品階
   const CAI_DROP_PCT = 3;             // cai 擅長出戰每隻 dropPct 加成
   const RESONANCE_PCT = 5;            // 血脈共鳴 atkPct/defPct
   // buff 技能可併入主人面板的 pct 鍵白名單（排除 dmgPct/healPct/cd/workPct）
@@ -398,7 +397,7 @@
     else if (job === 'sl') expPerH = SL_EXP_PS(grade) * 3600 * mult;
     else if (job === 'explore') {
       const cai = sp && (sp.apt || []).indexOf('cai') >= 0 ? 1.15 : 1; // cai 擅長探索加成
-      lingShiPerH = realmRate() * EXPLORE_LS_PS * grade * 3600 * mult * cai;
+      lingShiPerH = XG.balance.exploreHourly[XG.state.player.realmIdx] * XG.balance.petGradeMult[Math.min(5,grade)] * mult * cai;
     }
     return { herbPerH: herbPerH, expPerH: expPerH, lingShiPerH: lingShiPerH };
   }

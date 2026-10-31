@@ -338,7 +338,7 @@
     const mr = XG.data.world && XG.data.world.marketRules;
     const bp = mr && mr.stock && mr.stock.basePrice;
     // 與坊市同一基準與靈石→靈玉換算；不採隨機賣家的浮動報價。
-    const marketLingYu = Math.max(1, Math.round(((bp && bp.equipPerGrade) || 800) * Math.max(1, eq.grade || 0) / 500));
+    const marketLingYu = XG.balance.equipYu(eq.grade);
     const buyer = (XG.state.fellows || []).find(function (f) { return f.alive; });
     const err = isEquipped(uid) ? '這件還穿在身上，請先卸下再處理。' : null;
     return { mat: mat, gems: gems, marketLingYu: marketLingYu,

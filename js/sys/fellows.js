@@ -545,6 +545,7 @@
   function marketSt() {
     const st = S();
     st.fellowMarket = st.fellowMarket || { at: 0, slots: [] };
+    if(st.fellowMarket.balanceVersion!=='1.9') st.fellowMarket={at:0,slots:[],balanceVersion:'1.9'};
     return st.fellowMarket;
   }
   function marketUnlocked() { return XG.cfg.isUnlocked('market'); }
@@ -659,7 +660,9 @@
           { k: 'lingYu', w: (mr.stock.currencyW && mr.stock.currencyW.lingYu) || 2 },
         ], 'w').k;
         slot.cur = cur;
-        slot.price = cur === 'lingYu' ? Math.max(1, Math.round(price / 500)) : Math.max(1, Math.round(price));
+        const baseQuote=XG.balance.marketPrice(slot,1,cur);
+        slot.price = XG.balance.marketPrice(slot,price/slot.price,cur);
+        slot.basePrice=baseQuote;
       }
       slot.line = sellPool.length ? fill(u.pick(sellPool), seller, { item: slot.name }) : '';
       st.slots.push(slot);
@@ -824,8 +827,12 @@
       d.discussAt[uid] = Date.now() + DISCUSS_CD_MS;
 
       const persona = personaOf(f);
-      const cultBase = XG.cfg.REALMS[f.realmIdx].rate * (1 + 0.12 * (f.layer - 1));
-      const cult = giveCult(cultBase * u.randInt(300, 900), '與' + f.name + '論道');
+      const budget=XG.balance.daily(), used=budget.discuss||0;
+      const factor=used<5?1:used<10?.3:0;
+      budget.discuss=used+1;
+      const higher=1+Math.min(.2,Math.max(0,f.realmIdx-S().player.realmIdx)*.1);
+      const cult = giveCult(XG.balance.standardRate()*u.randInt(600,1200)*higher*factor, '與' + f.name + '論道');
+      XG.bus.emit('save:dirty');
       const favorAdd = u.clamp(Math.round(u.rand(2, 4) * (persona.favorGain || 1)), 1, 8);
       f.favor = u.clamp(f.favor + favorAdd, 0, 100);
       maxStat('fellow_favor_max', f.favor);
@@ -952,7 +959,8 @@
             kind: s.kind, id: s.id, baseId: s.baseId || '', grade: s.grade,
             n: s.n, name: s.name, icon: s.icon,
             price: s.price, cur: s.cur, curName: s.cur === 'lingYu' ? '靈玉' : '靈石',
-            sold: !!s.sold || s.n <= 0, line: s.line || '',
+            basePrice:s.basePrice, dailyLeft:s.kind==='pill'?Math.max(0,3-(XG.balance.daily().purchases[s.id]||0)):null,
+            sold: !!s.sold || s.n <= 0 || (s.kind==='pill'&&(XG.balance.daily().purchases[s.id]||0)>=3), line: s.line || '',
           };
         }),
       };
@@ -970,6 +978,8 @@
         const known0 = (XG.state.alchemy && XG.state.alchemy.known) || [];
         if (known0.indexOf(slot.id) >= 0) return { ok: false, msg: '此丹方你已參悟，這宗買賣作罷。' };
       }
+      const budget=XG.balance.daily();
+      if(slot.kind==='pill'&&(budget.purchases[slot.id]||0)>=3) return {ok:false,msg:'這種成品丹今日已買3顆，換攤也不能瞞過仙界帳本。'};
       const cost = { [slot.cur]: slot.price };
       if (!XG.hasRes(cost)) return { ok: false, msg: (slot.cur === 'lingYu' ? '靈玉' : '靈石') + '不足。' };
       XG.addRes({ [slot.cur]: -slot.price });
@@ -1003,6 +1013,8 @@
           got += '（煉器鋪未開，折算為材料）';
         }
       }
+      if(slot.kind==='pill') budget.purchases[slot.id]=(budget.purchases[slot.id]||0)+1;
+      XG.bus.emit('save:dirty');
       slot.n--;
       if (slot.n <= 0) slot.sold = true;
       const f = findFellow(slot.uid);
@@ -1069,8 +1081,8 @@
       const f = findFellow(info.uid);
       const d = S().daily = S().daily || {};
       d.dualAt = Date.now() + DUAL_CD_MS;
-      const base = XG.cfg.REALMS[f.realmIdx].rate * (1 + 0.12 * (f.layer - 1));
-      const cult = giveCult(base * U().randInt(600, 1800), '與' + f.name + '雙修');
+      const base = XG.balance.standardRate();
+      const cult = giveCult(XG.balance.activityCult(base * U().randInt(600, 1200)), '與' + f.name + '雙修');
       const text = fill(U().pick(lines().partner || ['「雙修共進。」']), f);
       return { ok: true, msg: '與' + f.name + '雙修一回，修為+' + U().fmt(cult), cult: cult, text: text };
     },

@@ -218,6 +218,8 @@
     html += '<div class="card-sub" style="margin:4px 2px 8px">道友 ' + fmtInt(cnt.total)
       + ' 人 · 摯友 ' + fmtInt(cnt.friend) + ' · 宿敵 ' + fmtInt(cnt.rival) + ' · 道侶 ' + fmtInt(cnt.partner) + '</div>';
     html += '<div class="row" style="margin:0 2px 8px"><button class="btn btn-primary" data-act="f-discuss-all">🍵 一鍵煮茶論道</button></div>';
+    const used=XG.balance.daily().discuss||0;
+    html+='<div class="muted">今日論道 '+used+' 次：前5次全額、6～10次三成，其後只增好感。高境界道友最多加成20%。</div>';
     let list = [];
     try { list = fs.list() || []; } catch (e) { list = []; }
     if (!list.length) html += '<div class="card xtc-lock">四下無人，待境界高深自有機緣結識。</div>';
@@ -415,7 +417,7 @@
     if (!m.slots || !m.slots.length) html += '<div class="card xtc-lock">今日坊市冷清，暫無貨色。</div>';
     html += '<div class="grid grid-2">';
     (m.slots || []).forEach(function (s) {
-      const base = marketBase(s);
+      const base = s.basePrice||marketBase(s);
       const g = gradeTxt(s.kind, s.grade);
       html += '<div class="card" style="margin-bottom:0">'
         + '<div class="xtc-mrow"><span>賣家 · ' + esc(s.sellerName) + '</span><span class="xtc-tag">' + esc(personaName(s.persona)) + '</span></div>'
@@ -426,6 +428,7 @@
         + (base && base > s.price ? '<span class="xtc-old">' + fmt(base) + '</span>' : '')
         + '<span class="xtc-price">' + fmt(s.price) + '</span> <span class="muted">' + esc(s.curName) + '</span>'
         + (base && base < s.price ? '<span class="muted" style="font-size:12px">（基準 ' + fmt(base) + '，賣家擡價）</span>' : '')
+        + (s.kind==='pill'?'<div class="muted">今日還可購買 '+s.dailyLeft+' 顆（同品項每日3顆，刷新不重置）</div>':'')
         + '<span class="muted" style="float:right">餘量 ×' + fmtInt(s.n) + '</span></div>'
         + '<button class="btn btn-primary" style="width:100%" data-act="m-buy" data-sid="' + esc(s.sid) + '"'
         + (s.sold ? ' disabled' : '') + '>' + (s.sold ? '已售罄' : '買下') + '</button>'
@@ -1059,7 +1062,7 @@
       + '<label class="row" style="cursor:pointer"><input type="checkbox" data-act="st-news"' + (st.newsCollapsed ? ' checked' : '') + '> 摺疊頂部傳聞滾動條</label></div>';
 
     html += '<div class="card"><h3 class="card-title">ℹ️ 關於</h3>'
-      + '<div class="xtc-kv"><span>版本</span><b>摸魚修仙 Cute v1.4（存檔 ver ' + ((XG.state && XG.state.ver) || 1) + '）</b></div>'
+      + '<div class="xtc-kv"><span>版本</span><b>摸魚修仙 Cute v1.9（存檔 ver ' + ((XG.state && XG.state.ver) || 1) + '）</b></div>'
       + '<div class="xtc-kv"><span>本世主角</span><b>' + genderBadge((XG.state.player || {}).gender) + ' ' + esc(XG.character.label((XG.state.player || {}).gender)) + '主角</b></div><div class="muted">成功輪回後可重新選擇性別。</div>'
       + '<div class="card-sub" style="margin:6px 0 4px">系統解鎖進度一覽</div>'
       + '<p class="cute-about">原作：shanawakiminouso-hub／xiuxian-idle，MIT 授權。可愛插畫與介面為本版新增。<a href="LICENSE" target="_blank">查看授權</a> · <a href="CUTE-README.md" target="_blank">遊戲說明</a></p><div data-r="stunlock">' + unlockListHtml() + '</div></div>';

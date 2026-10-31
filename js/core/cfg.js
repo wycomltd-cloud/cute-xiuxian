@@ -5,11 +5,8 @@
 
   XG.cfg = {
     // 大境界表（順序即進度；baseCost=每層突破修為基數；rate=基礎修為/秒；breakRate=突破基礎成功率）
-    // 節奏校準（2026 重調）：baseCost 按「裸速全境耗時目標」反推（Σ layer^2.2/(1+0.12(l-1)) ≈ 320），
-    // 目標：煉氣≈5分鐘 / 築基≈9小時 / 金丹≈1天 / 元嬰≈2天 / 化神≈3天 / 煉虛≈3.5天 / 合體≈4天 / 大乘≈4天 / 渡劫≈4天；
-    // 舊檔 baseCost 每境 ×250（速率僅 ×4.3，每境耗時 ×58，元嬰起曲線斷裂），故壓縮至每境 ×4~11。
+    // v1.9 基準耗時由 core/balance.js 依閉關1.3倍、初始靈根及洞府加成統一反推。
     REALMS: [
-      // 煉氣 baseCost 20→10（QA 節奏校準）：首日煉氣→築基純掛機 19.2 分鐘 → 9.6 分鐘（口徑：Σcost/基礎rate）
       { id: 'lianqi',   name: '煉氣', baseCost: 10,     rate: 10,    breakRate: 0.65 },
       { id: 'zhuji',    name: '築基', baseCost: 4e3,    rate: 40,    breakRate: 0.60 },
       { id: 'jindan',   name: '金丹', baseCost: 4.3e4,  rate: 160,   breakRate: 0.55 },

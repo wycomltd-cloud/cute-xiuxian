@@ -854,7 +854,7 @@
     else {
       const cur = (mi.modes || []).filter(function (m) { return m.id === mi.mode; })[0];
       tip = cur ? cur.desc : '';
-      if (tip) tip += '點擊場景中的小人可手動吐納（每次約得20秒修為）。';
+      if (tip) tip += '點擊場景中的小人可手動吐納（每次得5秒修為、冷卻3秒；每日100次後一成）。';
     }
     setT('xgh-mode-tip', tip);
   }
@@ -1297,7 +1297,7 @@
       buttons: [{ text: '收好，都是我的！', cls: 'btn-primary' }],
     });
   }
-  function quickCultivate() {
+  function quickCultivate(confirmed) {
     const bag = (S().inv && S().inv.pill) || {};
     const TYPES = { cult: 1, atk: 1, def: 1, hp: 1, work: 1 };
     const recipes = (XG.data && XG.data.pills && XG.data.pills.recipes) || [];
@@ -1312,13 +1312,16 @@
     }
     if (!plan.length) { toast('囊中沒有修為丹或增益丹可服', 'info'); return; }
     if (!sys('alchemy') || typeof sys('alchemy').usePill !== 'function') { toast('丹道未開，無法服丹', 'red'); return; }
+    if(!confirmed && plan.some(it=>it.eff.type==='cult'&&!it.eff.dur)) {
+      modal({title:'一鍵服丹前的小提醒 🫖',html:'<p>今日已服 '+(XG.balance.daily().pills||0)+' 顆修為丹。前2顆全效、3～4顆半效，其後一成。一鍵修煉會連續服用丹藥，低藥效時也會消耗。</p>',buttons:[{text:'先留著'},{text:'確定服用',cls:'btn-primary',cb:function(){quickCultivate(true);}}]});return;
+    }
     let ate = 0, cultSum = 0, blocked = 0;
     for (const it of plan) {
       for (let i = 0; i < it.n; i++) {
         const r = call('alchemy', 'usePill', [it.id]);
         if (r && r.ok) {
           ate++;
-          if (it.eff.type === 'cult' && !it.eff.dur) cultSum += it.eff.val * (it.star ? 1.5 : 1);
+          if (it.eff.type === 'cult' && !it.eff.dur) cultSum += r.actualCult||0;
         } else { blocked += it.n - i; break; }
       }
     }
@@ -1327,7 +1330,7 @@
       if (cultSum > 0) pop('+' + fmt(cultSum) + ' 修為', '');
     }
     let msg = ate > 0 ? ('服下 ' + ate + ' 枚丹藥') : '一枚也未服下';
-    if (blocked > 0) msg += '，' + blocked + ' 枚因丹毒淤積受阻';
+    if (blocked > 0) msg += '，' + blocked + ' 枚因丹毒或境界限制未服';
     if (ate > 0) msg += '（丹毒 ' + Math.round((S().player && S().player.toxicity) || 0) + '）';
     toast(msg, ate > 0 ? 'gold' : 'red');
     homeUpdate();
@@ -1408,6 +1411,7 @@
         '<div class="xgh-reminds" id="xgh-reminds"></div>' +
         // ⓪ 修煉場景（scene.js 掛載點：盤坐小人+靈氣動畫+事件聯動）
         '<div id="scene-root" class="xgh-scene"></div>' +
+        '<div id="cute-budget-status" class="card-sub" style="margin:8px 4px"></div>' +
         // ① 境界大卡
         '<div class="card cute-realm-card"><h2 class="card-title">今日修仙進度</h2>' +
         '<div class="row" style="justify-content:space-between"><b id="xgh-r-name" style="font-size:17px;color:var(--qing-d)"></b><span class="muted" id="xgh-r-mode"></span></div>' +

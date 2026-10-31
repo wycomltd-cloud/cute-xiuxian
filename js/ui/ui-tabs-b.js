@@ -943,7 +943,7 @@
     let h = '<div class="tbb-rowline"><span class="tbb-tier">' + (TIER_ICONS[o.tier.id] || '🏅') + '</span>'
       + '<div><b style="font-size:16px">' + esc(o.tier.name) + '</b>'
       + '<div class="muted">積分 <b style="color:var(--gold-d)">' + fmtI(o.pts) + '</b></div></div>'
-      + '<span class="tbb-sp"></span><div style="text-align:right"><div class="muted">每 10 分鐘結算</div></div></div>';
+      + '<span class="tbb-sp"></span><div style="text-align:right"><div class="muted">每日零時結算</div></div></div>';
     if (o.nextTier) {
       h += '<div class="progress" style="margin:6px 0"><div class="progress-fill" style="width:' + ((o.progress || 0) * 100).toFixed(1) + '%"></div>'
         + '<div class="progress-text">距「' + esc(o.nextTier.name) + '」還需 ' + fmtI(Math.max(0, o.nextTier.min - o.pts)) + ' 分</div></div>';

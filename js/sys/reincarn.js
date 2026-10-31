@@ -426,7 +426,8 @@
     st.cave = def.cave;                            // 洞府建築重置
     st.expedition = def.expedition;
     st.dungeon = def.dungeon;
-    st.pvp = def.pvp;
+    const keptPvp={season:st.pvp.season,pending:st.pvp.pending||[],balanceVersion:st.pvp.balanceVersion};
+    st.pvp = Object.assign(def.pvp,keptPvp);
     st.adventure = def.adventure;
     st.daily = def.daily;
     // 保留不碰：codex / ach(含永久 eff) / fellows(見下) / news / stats / settings /

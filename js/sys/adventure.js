@@ -386,11 +386,13 @@
     const scale = rewardScale(e);
     const sc = function (v) { return Math.max(1, Math.floor((v || 0) * scale)); };
 
-    if (out.cult) { const v = sc(out.cult); giveCult(v, src); rw.cult = (rw.cult || 0) + v; msg.push('修為 +' + resultInt(v)); }
+    if (out.cult) { const v = XG.balance.activityCult(sc(out.cult)); giveCult(v, src); rw.cult = (rw.cult || 0) + v; msg.push('修為 +' + resultInt(v)); }
     if (out.lingShi || out.lingYu || out.mat || out.pill || out.egg) {
       const d = {};
-      const ls = out.lingShi ? sc(out.lingShi) : 0;
-      const ly = out.lingYu ? sc(out.lingYu) : 0;
+      const growth=[1,2,4,8,16,28,44,64,88,88];
+      const moneyScale=growth[p.realmIdx]/growth[e.minRealm||0];
+      const ls = out.lingShi ? XG.balance.activityStone(Math.max(1,Math.floor(out.lingShi*moneyScale))) : 0;
+      const ly = out.lingYu ? XG.balance.activityJade(out.lingYu) : 0;
       if (ls) d.lingShi = ls;
       if (ly) d.lingYu = ly;
       if (out.mat) d.mat = out.mat;
@@ -448,8 +450,8 @@
       const a = adv(), s = stats();
       s.hidden_end = (s.hidden_end || 0) + 1;
       a.hiddenEnd = { eventId: e.id, text: out.hiddenEnd, t: Date.now() };
-      const bonusYu = XG.util.randInt(5, 10);
-      const bonusCult = realmRate() * 1800;
+      const bonusYu = XG.balance.activityJade(XG.util.randInt(5, 10));
+      const bonusCult = XG.balance.activityCult(XG.balance.standardRate() * 1800);
       XG.addRes({ lingYu: bonusYu });
       giveCult(bonusCult, '奇遇·隱藏結局');
       rw.lingYu = (rw.lingYu || 0) + bonusYu;

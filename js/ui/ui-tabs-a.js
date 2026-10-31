@@ -744,6 +744,13 @@
     const A = sys('alchemy'); if (!A) return;
     const id = arg || (t && t.getAttribute && t.getAttribute('data-id'));
     if (op === 'sub') { SA.sub = arg; rerender('alchemy'); return; }
+    if(op==='useall') {
+      const info=A.pillInfo(id), rc=(XG.data.pills.recipes||[]).find(r=>r.id===info.baseId);
+      if(rc&&XG.balance.instantPill(rc)) {
+        XG.ui.modal({title:'全服前，先看藥效 🫖',html:'<p>今日已服 '+(XG.balance.daily().pills||0)+' 顆修為丹。前2顆全效、3～4顆半效，其後僅一成。全服會繼續使用低藥效丹藥，並增加丹毒。</p><p>下顆實得修為 '+esc(fmt(XG.balance.pillGain(rc,info.star)))+'。確定連續服用？</p>',buttons:[{text:'先留著'},{text:'確定全服',cls:'btn-primary',cb:function(){const result=A.useAll(id);toast(result.msg,!result.ok);rerender('alchemy');}}]});
+        return;
+      }
+    }
     if (op === 'sell') {
       const sale = A.saleInfo(id);
       if (!sale || sale.count < 1) { toast('丹囊裡已沒有這顆丹藥。', true); rerender('alchemy'); return; }
@@ -768,8 +775,8 @@
     else if (op === 'setfire' || op === 'fire2') r = A.setFire(id);
     else if (op === 'use') {
       r = A.usePill(id);
-      if (r && r.ok && r.eff && r.eff.type === 'cult') {
-        pop('+' + fmt(r.eff.val * (r.star ? 1.5 : 1)) + ' 修為', 'pop-good');
+      if (r && r.ok && r.actualCult>0) {
+        pop('+' + fmt(r.actualCult) + ' 修為', 'pop-good');
       }
     }
     else if (op === 'useall') {
