@@ -901,7 +901,7 @@
         name: r.name + (star ? '·極品' : ''),
         icon: r.icon + (star ? '★' : ''),
         grade: r.grade, desc: r.desc,
-        effText: effText(r, star)+(XG.balance.instantPill(r)?'；今日已服'+(XG.balance.daily().pills||0)+'顆，下顆實得修為 '+XG.util.fmt(XG.balance.pillGain(r,star))+'（藥效'+Math.round(XG.balance.pillFactor(XG.balance.daily().pills||0)*100)+'%）':''), tox: r.tox,
+        effText: effText(r, star)+(XG.balance.instantPill(r)?'；每顆藥效固定，丹毒另計':''), tox: r.tox,
         usable: usable, reason: reason, count: count,
       };
     },

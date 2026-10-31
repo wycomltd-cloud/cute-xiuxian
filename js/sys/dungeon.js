@@ -412,7 +412,7 @@
       cult: 0, mat: {}, equip: null, frag: null, egg: 0, lingYu: 0,
     };
     const cultSec = 60 + 12 * n;
-    rw.cult = Math.floor((XG.stats.get().cultRate || XG.cfg.REALMS[XG.state.player.realmIdx].rate) *
+    rw.cult = Math.floor(XG.balance.standardRate() *
       cultSec * (1 + rwPct('rwCultPct') / 100));
     rw.lingShi=XG.balance.activityStone(rw.lingShi);
     XG.addRes({ lingShi: rw.lingShi });
@@ -642,7 +642,7 @@
   function layerStandard(n) {
     return {
       lingShi: Math.floor(100 * Math.pow(n, 1.5) * (1 + rwPct('rwLingShiPct') / 100)),
-      cult: Math.floor((XG.stats.get().cultRate || XG.cfg.REALMS[XG.state.player.realmIdx].rate) *
+      cult: Math.floor(XG.balance.standardRate() *
         (60 + 12 * n) * (1 + rwPct('rwCultPct') / 100)),
     };
   }
@@ -654,7 +654,7 @@
       ls += s.lingShi; cult += s.cult;
     }
     const bundles = Math.floor((d.towerBest - 1) / 10);
-    return { lingShi: Math.floor(ls * SWEEP_RATE), cult: Math.floor(cult * SWEEP_RATE), bundles: bundles };
+    return { lingShi: XG.balance.activityStone(Math.floor(ls * SWEEP_RATE)), cult: XG.balance.activityCult(Math.floor(cult * SWEEP_RATE)), bundles: bundles };
   }
   function sweepInfo() {
     ensureSweepDay();
@@ -665,7 +665,7 @@
       perDay: SWEEP_PER_DAY,
       best: d.towerBest,
       canSweep: d.towerBest > 1 && (d.sweepFree > 0 || XG.hasRes({ lingYu: SWEEP_PAY })),
-      est: Object.assign({},sweepEst(),{lingShi:Math.min(sweepEst().lingShi,XG.balance.activityStoneRemaining()),cult:Math.min(sweepEst().cult,Math.floor(XG.balance.standardRate()*Math.max(0,14400-(XG.balance.daily().activitySec||0))))}),
+      est: sweepEst(),
     };
   }
 
@@ -683,8 +683,6 @@
       paid = true;
     }
     const est = sweepEst();
-    est.cult=XG.balance.activityCult(est.cult);
-    est.lingShi=XG.balance.activityStone(est.lingShi);
     XG.addRes({ lingShi: est.lingShi });
     giveCult(est.cult, '鎮妖塔掃蕩');
     // 掃蕩添頭：每 10 層贈 1 份鍛造材料 + 1 株煉丹靈草 + 1 份功法殘篇

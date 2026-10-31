@@ -1,4 +1,4 @@
-const {game}=require('./balance.test.cjs'),assert=require('assert/strict');let n=0;
+const {game}=require('./game-harness.cjs'),assert=require('assert/strict');let n=0;
 function ok(v,msg){assert.ok(v,msg);n++;}function eq(a,b,msg){ok(Math.abs(a-b)<.001,msg+': '+a+' != '+b);}
 {
  const {x}=game(),A=x.sys.alchemy;

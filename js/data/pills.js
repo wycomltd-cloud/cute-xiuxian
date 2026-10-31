@@ -67,7 +67,7 @@
   };
 
   // ================= 丹方（34 張：修為 6 檔 / 破境 4 檔 / 療傷 4 / 解毒 3 / 靈根 3 / 靈寵 3 / 打工 2 / 悟性 3 / 戰鬥 6，含隱藏 4） =================
-  // v1.9：六種立即修為丹於表後依適用境界整境需求的5%重算；破境丹及限時加速丹維持原效果。
+  // v1.9：六種立即修為丹於表後依適用境界整境需求的1%重算；破境丹及限時加速丹維持原效果。
   const recipes = [
     // —— 修為丹·六品階（type:cult 立即修為） ——
     { id: 'pill_juqi', name: '聚氣丹', icon: '💊', grade: 1, hidden: false, alchLv: 1,
@@ -259,8 +259,8 @@
   ];
   recipes.forEach(function(r) {
     if (XG.balance.instantPill(r)) {
-      r.eff.val=Math.floor(XG.balance.stageCost(XG.balance.pillRealm(r))*.05);
-      r.desc += ' 適用'+XG.cfg.REALMS[XG.balance.pillRealm(r)].name+'起；每日前2顆全效、3～4顆半效、之後一成，普通與極品共用次數。';
+      r.eff.val=Math.floor(XG.balance.stageCost(XG.balance.pillRealm(r))*.01);
+      r.desc += ' 適用'+XG.cfg.REALMS[XG.balance.pillRealm(r)].name+'起；每顆藥效固定，丹毒另計。';
     }
   });
 

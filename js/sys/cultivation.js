@@ -42,7 +42,7 @@
  *   addDunwuBoost(pct, durSec) // 悟性丹等：durSec 秒內頓悟觸發率 +pct%（alchemy 服悟性丹後調用）
  *   addRootWashBoost(pct, durSec) // 淬靈丹(eff root val=3)：durSec 秒內洗練變異率 +pct 百分點
  *   tuona()                    // 手動吐納（美術場景點擊小人調用）：全局 3s 冷卻，
- *                              // gain=當前 cultRate×5（每日100次後×0.1） → { ok:true, gain }；冷卻中 → { ok:false, cd(秒) }
+ *                              // gain=當前 cultRate×1（每次固定收益） → { ok:true, gain }；冷卻中 → { ok:false, cd(秒) }
  *
  * ============================ 寫入的 state.stats 鍵（snake，成就統計器讀） ============================
  *   total_cult(累計獲得修為) / news_count(本系統傳聞條數) / dunwu_count(頓悟次數)
@@ -93,7 +93,7 @@
     return waves;
   }
   const TUONA_CD_MS = 3000;       // 手動吐納全局冷卻（毫秒）
-  const TUONA_SEC = 5;          // 手動吐納單次收益 = 當前 cultRate × 秒數
+  const TUONA_SEC = 1;          // 手動吐納單次收益 = 當前 cultRate × 秒數
 
   // 頓悟傳聞文案池（古風，隨機取一）
   const DUNWU_NEWS = [
@@ -346,7 +346,7 @@
       return n;
     },
 
-    // 手動吐納：全局 3s 冷卻；收益 = 當前 cultRate × 5 秒（走 addCult 統一入口）
+    // 手動吐納：全局 3s 冷卻；收益 = 當前 cultRate × 1 秒（走 addCult 統一入口）
     tuona() {
       const now = Date.now();
       if (now - tuonaLastAt < TUONA_CD_MS) {
@@ -355,9 +355,8 @@
       tuonaLastAt = now;
       const rate = XG.stats ? XG.stats.get().cultRate : 0;
       const d=XG.balance.daily();
-      const factor=(d.taps||0)<100?1:.1;
       d.taps=(d.taps||0)+1;
-      const gain = this.addCult(rate * TUONA_SEC * factor, '吐納');
+      const gain = this.addCult(rate * TUONA_SEC, '吐納');
       XG.bus.emit('save:dirty');
       bumpStat('tuona_count', 1);
       XG.bus.emit('tuona', { gain: gain }); // 美術場景監聽聯動

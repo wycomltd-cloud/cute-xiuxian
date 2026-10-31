@@ -953,7 +953,7 @@
     h += '<div class="tbb-rowline" style="font-size:12px">'
       + '<span class="muted">戰績 ' + (o.wins || 0) + ' 勝 / ' + (o.losses || 0) + ' 負</span>'
       + (o.streak >= 2 ? '<span style="color:var(--gold-d)">' + o.streak + ' 連勝（下場勝 +' + Math.min(30, 3 * o.streak) + '）</span>' : '')
-      + '<span class="tbb-sp"></span><span class="muted">今日有獎場次 ' + o.dailyLeft + ' / ' + o.dailyMax + '</span></div>';
+      + '<span class="tbb-sp"></span><span class="muted">每場皆有修為與靈石</span></div>';
     // 週期結算
     h += '<div style="margin-top:8px;border-top:1px dashed var(--line);padding-top:6px">'
       + '<div class="tbb-rowline"><b style="font-size:13px">週期結算獎勵</b><span class="tbb-sp"></span>'

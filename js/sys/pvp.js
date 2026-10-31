@@ -4,7 +4,7 @@
  *      戰鬥自動結算：雙方戰力 × 流派克制（劍→符→陣→丹→體→劍，玩家依距離 +20%/+10%/0%/-10%/-20%）× 隨機 0.9~1.1，三局兩勝；
  *      週期=每日零時一輪，段位 pts 閾值：青銅0/白銀1200/黃金1500/白金1800/鑽石2100/仙尊2500；
  *      勝 +30 / 負 -15（按對手強度浮動）；連勝加成：2 連勝起每場勝利 +3 遞增、封頂 +30（敗北清零）；
- *      每日前 5 場發靈石+修為，之後僅 pts；戰報 history ≤20；
+ *      每場發少量靈石+修為及 pts；戰報 history ≤20；
  *      每日零時按當前段位自動結算，發靈玉+隨機殘篇，進入可補領列表（不打也發基礎獎，不懲罰缺席）；
  *      宿敵聯動：對手 relation==='rival' 時防禦性調 XG.sys.fellows.onRivalBattle(win, uid)，
  *      fellows 系統未就位時自行用 lines.war 文案池發戰書 news 兜底。
@@ -21,12 +21,12 @@
  *       counter:'win'|'lose'|'none',        // 玩家剋制對方/被剋制/無剋制
  *       delta, pts,                          // pts 變化量與賽後總分
  *       tier:{id,name,min}, tierUp:bool, tierDown:bool,
- *       reward:null|{ cult, lingShi },       // 每日前5場纔有，之後為 null
+ *       reward:null|{ cult, lingShi },       // 每場均有修為與靈石
  *       dailyLeft, streak, streakBonus,      // streak=賽後連勝數；streakBonus=本場連勝加成積分
  *       rival:bool, upset:bool }  // upset=越階挑戰(對手戰力≥1.3倍仍勝)
  * XG.sys.pvp.getOverview()
  *   → { unlocked, pts, tier:{id,name,min,idx}, nextTier:null|{id,name,min}, progress:0~1,
- *       wins, losses, streak, dailyLeft, dailyMax:5, season:'YYYY-Www',
+ *       wins, losses, streak, dailyLeft, dailyMax:null, season:'YYYY-Www',
  *       pending:[{season,tierId,tierName,lingYu,frags,t}], school, schoolName, historyLen }
  * XG.sys.pvp.getHistory()
  *   → [{ t, name, uid, win, delta, pts, rounds:[bool..], rival }]  // 新→舊，≤20 條
@@ -87,7 +87,6 @@
   const MATCH_RANGE = 0.4;     // 匹配戰力窗口 ±40%
   const WIN_PTS = 30;          // 勝利基礎積分
   const LOSE_PTS = 15;         // 失敗基礎積分
-  const DAILY_MAX = 5;         // 每日有獎勵場次
   const HISTORY_CAP = 20;      // 戰報上限
   const PENDING_CAP = 4;       // 賽季待補領獎勵緩存上限
   const UPSET_RATIO = 1.3;     // 越階挑戰判定：對手戰力 ≥ 1.3 × 玩家
@@ -146,7 +145,7 @@
     if (s.daily.pvpDay !== todayKey()) { s.daily.pvpDay = todayKey(); s.daily.pvpCount = 0; }
     return s.daily.pvpCount || 0;
   }
-  function dailyLeft() { return Math.max(0, DAILY_MAX - dailyCount()); }
+  function dailyLeft() { return null; } // 相容舊介面；每場皆有獎勵，不再設剩餘場次。
 
   // 玩家戰力（stats 面板為準，異常時退化為境界裸基值）
   function playerPower() {
@@ -358,14 +357,15 @@
     if (p.pts > (stats.pvp_pts_max || 0)) stats.pvp_pts_max = p.pts; // 積分歷史峯值（check.k=pvpPts）
     if (upset) statsAdd('pvp_upsets');
 
-    // 每日前 5 場發獎勵（靈石+修為），之後僅 pts
+    // 每場發少量獎勵（靈石+修為），不設每日領取上限
     let reward = null;
-    if (dailyLeft() > 0) {
+    {
       const pl = XG.state.player;
       const realm = XG.cfg.REALMS[pl.realmIdx] || XG.cfg.REALMS[0];
       const baseRate = realm.rate * (1 + 0.12 * (pl.layer - 1)); // 境界基礎產出（不含外部加成，防速通）
-      const cult = XG.balance.activityCult(Math.round(baseRate * (win ? 900 : 300) * XG.util.rand(0.9, 1.2))); // 勝≈15分鐘 / 負≈5分鐘
-      const lingShi = Math.round(Math.pow(pl.realmIdx + 1, 1.5) * 200 * (win ? 1 : 0.4) * XG.util.rand(0.8, 1.3));
+      const cult = XG.balance.activityCult(Math.round(baseRate * (win ? 12 : 6) * XG.util.rand(0.9, 1.2))); // 原始秒數再經單次活動公式換算
+      const stoneBase=[1,2,4,8,16,30,50,80,120,120][pl.realmIdx];
+      const lingShi = Math.max(1,Math.round(stoneBase*(win?1:.5)*XG.util.rand(.8,1.2)));
       grantCult(cult, win ? '論劍得勝' : '論劍惜敗');
       XG.addRes({ lingShi: lingShi });
       reward = { cult: cult, lingShi: lingShi };
@@ -469,7 +469,7 @@
       nextTier: next ? { id: next.id, name: next.name, min: next.min } : null,
       progress: next ? XG.util.clamp((p.pts - tier.min) / span, 0, 1) : 1,
       wins: p.wins, losses: p.losses, streak: p.streak,
-      dailyLeft: dailyLeft(), dailyMax: DAILY_MAX,
+      dailyLeft: dailyLeft(), dailyMax: null,rewardEveryMatch:true,
       season: p.season, pending: XG.util.deepClone(p.pending),
       school: getSchool().id, schoolName: getSchool().name,
       historyLen: p.history.length,

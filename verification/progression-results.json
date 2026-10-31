@@ -1,29 +1,37 @@
-[
-  {
-    "label": "每日登入兩次",
-    "loginsPerDay": 2,
-    "assumedPermanentCultPct": 10,
-    "assumedSameRealmPillsPerDay": 1,
-    "daysToHuashen": 6.51,
-    "realm": 4,
-    "sessions": 13
-  },
-  {
-    "label": "一般活躍",
-    "loginsPerDay": 6,
-    "assumedPermanentCultPct": 25,
-    "assumedSameRealmPillsPerDay": 1,
-    "daysToHuashen": 5.02,
-    "realm": 4,
-    "sessions": 30
-  },
-  {
-    "label": "頻繁登入",
-    "loginsPerDay": 24,
-    "assumedPermanentCultPct": 40,
-    "assumedSameRealmPillsPerDay": 2,
-    "daysToHuashen": 3.97,
-    "realm": 4,
-    "sessions": 95
-  }
-]
+{
+  "assumptions": [
+    "每次登入與所有可論道道友論道一次、領一次代表性奇遇、少量吐納",
+    "閉關收益及假設永久修練加成；丹藥假設已取得，未模擬購買或煉製成本",
+    "即時嘗試突破；包含既有成功率與渡劫；未模擬裝備、功法、靈寵、全部活動或真實經濟",
+    "僅用於比較登入頻率，並非保證到達時間"
+  ],
+  "scenarios": [
+    {
+      "label": "每日登入兩次",
+      "loginsPerDay": 2,
+      "assumedPermanentCultPct": 10,
+      "assumedSameRealmPillsPerDay": 1,
+      "daysToHuashen": 8.01,
+      "realm": 4,
+      "sessions": 16
+    },
+    {
+      "label": "一般活躍",
+      "loginsPerDay": 6,
+      "assumedPermanentCultPct": 25,
+      "assumedSameRealmPillsPerDay": 1,
+      "daysToHuashen": 6.53,
+      "realm": 4,
+      "sessions": 39
+    },
+    {
+      "label": "頻繁登入",
+      "loginsPerDay": 24,
+      "assumedPermanentCultPct": 40,
+      "assumedSameRealmPillsPerDay": 2,
+      "daysToHuashen": 5.23,
+      "realm": 4,
+      "sessions": 125
+    }
+  ]
+}

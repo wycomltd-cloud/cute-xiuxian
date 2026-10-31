@@ -829,10 +829,9 @@
 
       const persona = personaOf(f);
       const budget=XG.balance.daily(), used=budget.discuss||0;
-      const factor=used<5?1:used<10?.3:0;
       budget.discuss=used+1;
       const higher=1+Math.min(.2,Math.max(0,f.realmIdx-S().player.realmIdx)*.1);
-      const cult = giveCult(XG.balance.standardRate()*u.randInt(600,1200)*higher*factor, '與' + f.name + '論道');
+      const cult = giveCult(XG.balance.standardRate()*u.randInt(2,4)*higher, '與' + f.name + '論道');
       XG.bus.emit('save:dirty');
       const favorAdd = u.clamp(Math.round(u.rand(2, 4) * (persona.favorGain || 1)), 1, 8);
       f.favor = u.clamp(f.favor + favorAdd, 0, 100);

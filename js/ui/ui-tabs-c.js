@@ -220,8 +220,7 @@
     html += '<div class="row" style="margin:0 2px 8px"><button class="btn btn-primary" data-act="f-discuss-all">🍵 一鍵煮茶論道</button></div>';
     const gift=fs.giftProgress();
     html+='<div class="card-sub">🎁 全體送禮累計 '+gift.totalSent+' 次，再送 '+gift.nextIn+' 次有一位道友回禮。可獲靈石／靈玉／裝備／丹藥／殘片。'+(gift.pendingReturns?'<button class="btn btn-primary" data-act="f-claim-gifts">領取待領回禮 ×'+gift.pendingReturns+'</button>':'')+'</div>';
-    const used=XG.balance.daily().discuss||0;
-    html+='<div class="muted">今日論道 '+used+' 次：前5次全額、6～10次三成，其後只增好感。高境界道友最多加成20%。</div>';
+    html+='<div class="muted">論道每次都有修為與好感，同一道友需調息10分鐘。</div>';
     let list = [];
     try { list = fs.list() || []; } catch (e) { list = []; }
     if (!list.length) html += '<div class="card xtc-lock">四下無人，待境界高深自有機緣結識。</div>';
@@ -1074,7 +1073,7 @@
       + '<label class="row" style="cursor:pointer"><input type="checkbox" data-act="st-news"' + (st.newsCollapsed ? ' checked' : '') + '> 摺疊頂部傳聞滾動條</label></div>';
 
     html += '<div class="card"><h3 class="card-title">ℹ️ 關於</h3>'
-      + '<div class="xtc-kv"><span>版本</span><b>摸魚修仙 Cute v1.9.3（存檔 ver ' + ((XG.state && XG.state.ver) || 1) + '）</b></div>'
+      + '<div class="xtc-kv"><span>版本</span><b>摸魚修仙 Cute v1.9.4（存檔 ver ' + ((XG.state && XG.state.ver) || 1) + '）</b></div>'
       + '<div class="xtc-kv"><span>本世主角</span><b>' + genderBadge((XG.state.player || {}).gender) + ' ' + esc(XG.character.label((XG.state.player || {}).gender)) + '主角</b></div><div class="muted">成功輪回後可重新選擇性別。</div>'
       + '<div class="card-sub" style="margin:6px 0 4px">系統解鎖進度一覽</div>'
       + '<p class="cute-about">原作：shanawakiminouso-hub／xiuxian-idle，MIT 授權。可愛插畫與介面為本版新增。<a href="LICENSE" target="_blank">查看授權</a> · <a href="CUTE-README.md" target="_blank">遊戲說明</a></p><div data-r="stunlock">' + unlockListHtml() + '</div></div>';

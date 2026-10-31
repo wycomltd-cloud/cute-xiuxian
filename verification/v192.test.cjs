@@ -1,4 +1,4 @@
-const {game}=require('./balance.test.cjs'),assert=require('assert/strict');let n=0;
+const {game}=require('./game-harness.cjs'),assert=require('assert/strict');let n=0;
 function ok(v,msg){assert.ok(v,msg);n++;}function eq(a,b,msg){ok(Math.abs(a-b)<1e-7,msg+': '+a+' != '+b);}
 function setup(x){Object.assign(x.state.player,{realmIdx:2,layer:5,gender:'male',school:'jian'});x.stats.invalidate();}
 function forceType(x,type){const pick=x.util.pick;x.util.pick=function(arr){return arr.includes(type)?type:pick.call(this,arr);};}
