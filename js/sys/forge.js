@@ -342,7 +342,7 @@
     const buyer = (XG.state.fellows || []).find(function (f) { return f.alive; });
     const err = isEquipped(uid) ? '這件還穿在身上，請先卸下再處理。' : null;
     return { mat: mat, gems: gems, marketLingYu: marketLingYu,
-      lingYu: Math.floor(marketLingYu * 0.6), buyerName: buyer ? buyer.name : null,
+      lingYu: Math.min(Math.floor(marketLingYu*.6),Number.isFinite(eq.marketPaidStone)?Math.floor(eq.marketPaidStone*.6/500):Infinity),marketCapped:Number.isFinite(eq.marketPaidStone), buyerName: buyer ? buyer.name : null,
       recycleErr: err, sellErr: err || (!buyer ? '暫時沒有道友可收購，稍後再來。' : null) };
   }
   function dispose(uid, kind) {
@@ -900,6 +900,10 @@
     getMods: getMods,
 
     // 全項目通用生成接口
+    takeGift(uid) {
+      const eq=getEquip(uid);if(!eq||isEquipped(uid))return false;
+      removeItem(uid);recount();invalidate();dirty();XG.bus.emit('res:changed');return true;
+    },
     createEquip: createEquip,
     makeDrop: makeDrop,
 

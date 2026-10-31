@@ -418,6 +418,7 @@
     };
     st.player = Object.assign(def.player, keepPlayer);
     st.res = { lingShi: 0, lingYu: keepLingYu };   // 靈石清空，靈玉×保留比例
+    st.marketPillLots={};
     st.inv = def.inv;                              // 材料/丹藥/殘篇/蛋 清空
     st.equips = def.equips;                        // 裝備重置
     st.gongfa = def.gongfa;                        // 功法重置

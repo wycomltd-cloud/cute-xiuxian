@@ -695,7 +695,7 @@
     const sale = sys('alchemy').saleInfo(info.id);
     if (sale) H.push('<button class="btn uta-btn-sm" data-act="al:sell" data-id="' + esc(info.id) + '">出售</button>');
     H.push('</div>');
-    if (sale) H.push('<div class="uta-mini">每顆可售 🪙 ' + fmtInt(sale.price) + ' 靈石（煉製靈石成本的60%）</div>');
+    if (sale) H.push('<div class="uta-mini">每顆可售 🪙 ' + fmtInt(sale.price) + ' 靈石（'+(sale.marketCapped?'坊市購得：不超過實付價60%，優先處理購買批次':'煉製靈石成本的60%')+'）</div>');
     if (!info.usable && info.reason) H.push('<div class="uta-no">' + esc(info.reason) + '</div>');
     H.push('</div>');
     return H.join('');
@@ -754,7 +754,7 @@
     if (op === 'sell') {
       const sale = A.saleInfo(id);
       if (!sale || sale.count < 1) { toast('丹囊裡已沒有這顆丹藥。', true); rerender('alchemy'); return; }
-      XG.ui.modal({ title: '出售丹藥 🪙', html: '<p>出售「' + esc(sale.name) + '」×1？</p><p><b>獲得靈石 ×' + fmtInt(sale.price) + '</b></p><p class="uta-mini">煉製靈石 ' + fmtInt(sale.craftLingShi) + ' ×60%，無條件捨去。普通與極品同價；每次只出售一顆，不會觸發服用效果。</p>', buttons: [
+      XG.ui.modal({ title: '出售丹藥 🪙', html: '<p>出售「' + esc(sale.name) + '」×1？</p><p><b>獲得靈石 ×' + fmtInt(sale.price) + '</b></p><p class="uta-mini">煉製靈石 ' + fmtInt(sale.craftLingShi) + ' ×60%，無條件捨去。'+(sale.marketCapped?'這顆為坊市購得，回收另以實付價60%為上限。':'')+'普通與極品共用煉製成本估價；每次出售一顆，不觸發服用效果。</p>', buttons: [
         { text: '再想想', cls: 'btn-ghost' },
         { text: '確認出售', cls: 'btn-primary', cb: function () {
           const result = A.sellPill(id);
@@ -1075,6 +1075,7 @@
     let html = '<p>「' + esc(d.name) + '」' + (recycling ? '準備回爐，退休後改當原材料。' : '將賣給道友「' + esc(info.buyerName) + '」，幫它找個新主人。') + '</p>';
     html += '<p><b>可獲得：' + esc(gain) + '</b></p>';
     html += recycling ? '<p class="uta-mini">原始打造配方材料返還 50%，數量無條件捨去；不返還打造靈石。</p>' : '<p class="uta-mini">坊市同品階靈玉基準價 ' + info.marketLingYu + ' ×60%，無條件捨去；不含賣家性格、關係或折扣浮動。</p>';
+    if(!recycling&&info.marketCapped)html+='<p class="uta-mini">坊市購得裝備：實際回收另以實付價60%折算靈玉為上限，向下取整，低價品可能為0靈玉。</p>';
     if (Object.keys(info.gems).length) html += '<p>鑲嵌寶石完整退回：' + esc(matText(info.gems)) + '</p>';
     html += '<p class="uta-mini">確認後裝備會消失，無法復原；強化、洗練、升星與器靈投入不另返還。</p>';
     XG.ui.modal({ title: recycling ? '回爐確認 🔥' : '出售確認 💠', html: html, buttons: [

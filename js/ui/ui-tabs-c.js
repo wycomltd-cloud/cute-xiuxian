@@ -218,6 +218,8 @@
     html += '<div class="card-sub" style="margin:4px 2px 8px">道友 ' + fmtInt(cnt.total)
       + ' 人 · 摯友 ' + fmtInt(cnt.friend) + ' · 宿敵 ' + fmtInt(cnt.rival) + ' · 道侶 ' + fmtInt(cnt.partner) + '</div>';
     html += '<div class="row" style="margin:0 2px 8px"><button class="btn btn-primary" data-act="f-discuss-all">🍵 一鍵煮茶論道</button></div>';
+    const gift=fs.giftProgress();
+    html+='<div class="card-sub">🎁 全體送禮累計 '+gift.totalSent+' 次，再送 '+gift.nextIn+' 次有一位道友回禮。可獲靈石／靈玉／裝備／丹藥／殘片。'+(gift.pendingReturns?'<button class="btn btn-primary" data-act="f-claim-gifts">領取待領回禮 ×'+gift.pendingReturns+'</button>':'')+'</div>';
     const used=XG.balance.daily().discuss||0;
     html+='<div class="muted">今日論道 '+used+' 次：前5次全額、6～10次三成，其後只增好感。高境界道友最多加成20%。</div>';
     let list = [];
@@ -236,6 +238,7 @@
         + esc(F_STATE[f.state] || '潛修') + (f.reincarn ? ' · ' + f.reincarn + '世' : '') + '</div>'
         + '<div class="progress xtc-fav"><div class="progress-fill" style="width:' + clampN(f.favor, 0, 100) + '%"></div>'
         + '<div class="progress-text">好感 ' + fmtInt(f.favor) + '/100</div></div>'
+        + '<button class="btn btn-ghost" data-act="f-gift" data-uid="'+esc(f.uid)+'">送禮 🎁</button><span class="muted"> 全體再送'+f.giftReturnIn+'次有回禮</span>'
         + '</div></div></div>';
     });
     html += '</div>';
@@ -259,6 +262,7 @@
       + '<div class="xtc-kv"><span>相識</span><b>' + esc(daysAgo(f.metAt)) + '</b></div>'
       + '<div class="progress xtc-fav"><div class="progress-fill" style="width:' + clampN(f.favor, 0, 100) + '%"></div>'
       + '<div class="progress-text">好感 ' + fmtInt(f.favor) + '/100</div></div>';
+    html+='<p class="muted">此道友已收禮 '+(f.giftsReceived||0)+' 次；全體累計 '+f.globalGiftsSent+' 次，再送 '+f.giftReturnIn+' 次有一位道友回禮。</p>';
     if (f.lastNews && f.lastNews.text) html += '<div class="xtc-say">📜 ' + esc(f.lastNews.text) + '</div>';
     if (extraHtml) html += extraHtml;
     const news = fellowNews(f.name, 6);
@@ -280,8 +284,32 @@
         btns.push({ text: '結為道侶', cls: 'btn-primary', cb: function () { doBecomePartner(el, uid); } });
       }
     }
+    btns.push({text:'送禮 🎁',cls:'btn-primary',cb:function(){showGiftDialog(el,uid);return false;}});
     btns.push({ text: '告辭', cls: 'btn-ghost', cb: function () { closeModal(); } });
     modal({ title: (rb ? '【' + rb[0] + '】' : '') + f.name + ' ' + XG.character.symbol(f.gender), html: html, buttons: btns });
+  }
+
+  function showGiftDialog(el,uid,resultText) {
+    const fs=sys('fellows'),f=fs.get(uid);if(!f)return;
+    const items=fs.giftItems(),labels={equip:'裝備',pill:'丹藥',frag:'殘片'};
+    let html=resultText?'<p class="xtc-say">'+esc(resultText)+'</p>':'';
+    html+='<p>送給 '+esc(f.name)+'：此道友已收禮 '+(f.giftsReceived||0)+' 次；全體累計 '+f.globalGiftsSent+' 次，距下次回禮 '+f.giftReturnIn+' 次。</p>';
+    html+='<p class="muted">每次送出1件，提高好感；送給不同道友的次數一起計算，每滿50次，由一位收過禮的道友隨機回贈靈石、靈玉、裝備、丹藥或殘片；回禮價值依這50件禮物估值控制。穿著的裝備不能送，鑲嵌寶石會隨裝備送出。</p>';
+    if(items.length) {
+      html+='<label for="fellow-gift-item">選擇禮物</label><select id="fellow-gift-item" style="width:100%;max-width:100%;padding:10px;margin:8px 0">';
+      ['equip','pill','frag'].forEach(function(kind){
+        const rows=items.map((it,index)=>({it:it,index:index})).filter(row=>row.it.kind===kind);if(!rows.length)return;
+        html+='<optgroup label="'+labels[kind]+'">';
+        rows.forEach(row=>{html+='<option value="'+row.index+'">'+esc(row.it.name)+' ×'+row.it.count+'</option>';});html+='</optgroup>';
+      });html+='</select>';
+    } else html+='<p>揹包暫時沒有可送的裝備、丹藥或殘片。</p>';
+    const buttons=[{text:'返回道友',cb:function(){showFellowDetail(el,uid);return false;}}];
+    if(items.length)buttons.push({text:'送出1件',cls:'btn-primary',cb:function(){
+      const selector=document.getElementById('fellow-gift-item'),item=selector&&items[Number(selector.value)];
+      if(!item)return false;const r=fs.sendGift(uid,item.kind,item.id);toast(r.msg,r.ok?'gold':'err');
+      renderFellows(el);showGiftDialog(el,uid,r.msg);return false;
+    }});
+    modal({title:'送禮給'+f.name+' 🎁',html:html,buttons:buttons});
   }
 
   function doDiscuss(el, uid) {
@@ -319,6 +347,10 @@
     const fs = sys('fellows');
     if (act === 'f-detail') {
       showFellowDetail(el, t.getAttribute('data-uid'));
+    } else if(act==='f-claim-gifts') {
+      const r=fs.claimGiftReturns();toast(r.msg,r.ok?'gold':'err');renderFellows(el);
+    } else if(act==='f-gift') {
+      showGiftDialog(el,t.getAttribute('data-uid'));
     } else if (act === 'f-discuss-all') {
       if (!fs) return;
       let r = null;
@@ -411,9 +443,9 @@
 
     const lingYu = (XG.state && XG.state.res && XG.state.res.lingYu) || 0;
     let html = '<div class="card"><div class="row" style="justify-content:space-between">'
-      + '<div>🕐 換新倒計時：<b>' + fmtTime(m.nextInSec) + '</b><div class="muted">每 10 分鐘自動換新一批</div></div>'
-      + '<button class="btn btn-primary" data-act="m-refresh"' + (lingYu >= 5 ? '' : ' disabled') + '>靈玉×5 立即換新</button>'
-      + '</div></div>';
+      + '<div>今日換新：<b>'+m.refreshUsed+' / 5</b><div class="muted">每日免費首批；不再每10分鐘自動換新。距每日重置 '+fmtTime(m.nextInSec)+'</div></div>'
+      + '<button class="btn btn-primary" data-act="m-refresh"' + (m.refreshLeft>0&&lingYu>=m.refreshCost ? '' : ' disabled') + '>'+(m.refreshLeft>0?'靈玉×'+m.refreshCost+' 換新（餘'+m.refreshLeft+'次）':'今日換新已用完')+'</button>'
+      + '</div><p class="muted">換新費用5／10／20／40／80靈玉；付費換新整批加價：第1次+20%、第2次+30%、第3次+40%、第4／5次+50%。坊市購得物品沿用實付價六成回收上限。</p><p class="muted">本批依生成時境界與戰力估價；提高實力後，下次換新可出現更高級商品。</p></div>';
     if (!m.slots || !m.slots.length) html += '<div class="card xtc-lock">今日坊市冷清，暫無貨色。</div>';
     html += '<div class="grid grid-2">';
     (m.slots || []).forEach(function (s) {
@@ -426,8 +458,9 @@
         + (s.line ? '<div class="muted" style="font-size:12px">' + esc(s.line) + '</div>' : '')
         + '<div style="margin:4px 0">'
         + (base && base > s.price ? '<span class="xtc-old">' + fmt(base) + '</span>' : '')
+        + (s.markup>0?'<span class="xtc-tag">原價 '+fmt(s.originalPrice)+' '+esc(s.curName)+' ＋'+Math.round(s.markup*100)+'%</span> ':'')
         + '<span class="xtc-price">' + fmt(s.price) + '</span> <span class="muted">' + esc(s.curName) + '</span>'
-        + (base && base < s.price ? '<span class="muted" style="font-size:12px">（基準 ' + fmt(base) + '，賣家擡價）</span>' : '')
+        + (base && base < s.price ? '<span class="muted" style="font-size:12px">（本批統一加價）</span>' : '')
         + (s.kind==='pill'?'<div class="muted">今日還可購買 '+s.dailyLeft+' 顆（同品項每日3顆，刷新不重置）</div>':'')
         + '<span class="muted" style="float:right">餘量 ×' + fmtInt(s.n) + '</span></div>'
         + '<button class="btn btn-primary" style="width:100%" data-act="m-buy" data-sid="' + esc(s.sid) + '"'
@@ -1062,7 +1095,7 @@
       + '<label class="row" style="cursor:pointer"><input type="checkbox" data-act="st-news"' + (st.newsCollapsed ? ' checked' : '') + '> 摺疊頂部傳聞滾動條</label></div>';
 
     html += '<div class="card"><h3 class="card-title">ℹ️ 關於</h3>'
-      + '<div class="xtc-kv"><span>版本</span><b>摸魚修仙 Cute v1.9（存檔 ver ' + ((XG.state && XG.state.ver) || 1) + '）</b></div>'
+      + '<div class="xtc-kv"><span>版本</span><b>摸魚修仙 Cute v1.9.2（存檔 ver ' + ((XG.state && XG.state.ver) || 1) + '）</b></div>'
       + '<div class="xtc-kv"><span>本世主角</span><b>' + genderBadge((XG.state.player || {}).gender) + ' ' + esc(XG.character.label((XG.state.player || {}).gender)) + '主角</b></div><div class="muted">成功輪回後可重新選擇性別。</div>'
       + '<div class="card-sub" style="margin:6px 0 4px">系統解鎖進度一覽</div>'
       + '<p class="cute-about">原作：shanawakiminouso-hub／xiuxian-idle，MIT 授權。可愛插畫與介面為本版新增。<a href="LICENSE" target="_blank">查看授權</a> · <a href="CUTE-README.md" target="_blank">遊戲說明</a></p><div data-r="stunlock">' + unlockListHtml() + '</div></div>';

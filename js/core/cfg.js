@@ -31,7 +31,7 @@
     BREAK_FAIL_BONUS: 0.08,  // 突破失敗保底成功率逐次 +8%（成功清零）
     BREAK_PILL_BONUS: 0.15,  // 每顆破境丹 +15%（最多用 3 顆）
     NEWS_CAP: 200,           // 傳聞緩存上限
-    FELLOW_COUNT: [30, 50],  // 開局道友數量區間
+    FELLOW_COUNT: [50, 50],  // 開局道友數量區間
 
     // 戰力公式（唯一）：攻*2 + 防*1.5 + 血*0.2 + 速*10
     POWER: function (s) { return s.atk * 2 + s.def * 1.5 + s.hp * 0.2 + s.spd * 10; },

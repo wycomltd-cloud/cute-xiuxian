@@ -1,6 +1,6 @@
 /* pvp.js：異步鬥法「論劍」系統（純邏輯層，契約 §10 模塊協議）
  *
- * 玩法：對手池=state.fellows（道友）；匹配=玩家戰力±40% 篩選 + 強度貼近/宿敵偏好，無匹配時全表隨機；
+ * 玩法：對手池=state.fellows（道友）；鬥法時基礎戰力同步玩家；選擇身份時仍以玩家戰力±40% 篩選 + 強度貼近/宿敵偏好，無匹配時全表隨機；
  *      戰鬥自動結算：雙方戰力 × 流派克制（劍→符→陣→丹→體→劍，玩家依距離 +20%/+10%/0%/-10%/-20%）× 隨機 0.9~1.1，三局兩勝；
  *      週期=每日零時一輪，段位 pts 閾值：青銅0/白銀1200/黃金1500/白金1800/鑽石2100/仙尊2500；
  *      勝 +30 / 負 -15（按對手強度浮動）；連勝加成：2 連勝起每場勝利 +3 遞增、封頂 +30（敗北清零）；
@@ -280,7 +280,7 @@
     return {
       uid: f.uid, name: f.name, gender: f.gender, school: f.school, schoolName: schoolName(f.school),
       persona: f.persona, relation: f.relation || 'stranger',
-      realmIdx: f.realmIdx || 0, layer: f.layer || 1, power: Math.round(fellowPower(f)),
+      realmIdx: f.realmIdx || 0, layer: f.layer || 1, power: playerPower(),
     };
   }
 
@@ -300,7 +300,7 @@
           opp = {
             uid: f.uid, name: f.name, gender: f.gender, school: f.school, schoolName: schoolName(f.school),
             persona: f.persona, relation: f.relation || 'stranger',
-            realmIdx: f.realmIdx || 0, layer: f.layer || 1, power: Math.round(fellowPower(f)),
+            realmIdx: f.realmIdx || 0, layer: f.layer || 1, power: playerPower(),
           };
           break;
         }
@@ -311,7 +311,8 @@
 
     const mySchool = getSchool().id;
     const pp = playerPower();
-    const op = Math.max(1, opp.power);
+    opp.power=pp; // 對戰開始時重新同步，裝備／層數變動後亦保持同戰力。
+    const op = Math.max(1, pp);
     const counterPct = counterBonus(mySchool, opp.school);
     const cmP = 1 + counterPct / 100, cmO = 1;
     const counter = counterPct > 0 ? 'win' : counterPct < 0 ? 'lose' : 'none';

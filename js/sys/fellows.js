@@ -18,7 +18,7 @@
  *   XG.sys.fellows.satisfyHelp(hid)  → {ok,msg,text,gift}            滿足求助（扣資源，好感+10+回贈）
  *   XG.sys.fellows.refuseHelp(hid)   → {ok,msg,text}                 拒絕求助（refuse 池文案，無懲罰）
  *   XG.sys.fellows.buyMarket(sid)    → {ok,msg}                      坊市購買（耗靈石/靈玉，每格限量）
- *   XG.sys.fellows.refreshMarket()   → {ok,msg}                      靈玉×5 立即刷新坊市
+ *   XG.sys.fellows.refreshMarket()   → {ok,msg}                      每日五次遞增費用換新坊市
  *   XG.sys.fellows.becomePartner(uid)→ {ok,msg}                      結緣道侶（好感=100，每日限1次操作）
  *   XG.sys.fellows.dualCultivate()   → {ok,msg,cult}                 每小時雙修一次（修為加成）
  * 屬性聚合：getMods() → 道侶在世時 {cultRatePct:10}
@@ -62,7 +62,6 @@
   const FAVOR_FRIEND = 60;            // 摯友門檻
   const FAVOR_PARTNER = 100;          // 道侶門檻
   const RIVAL_CAP = 3;                // 宿敵數量上限
-  const MARKET_MANUAL_COST = 5;       // 靈玉立即刷新坊市
   const HELP_ROLL_MS = 4 * 3600000;   // 求助重搖間隔（每 4 小時一波）
   const HELP_PER_ROLL = [1, 3];       // 每波求助道友數區間
   const DISCUSS_CD_MS = 600000;       // 論道冷卻（每友 10 分鐘）
@@ -188,15 +187,11 @@
   }
 
   function ensureFellows() {
-    const st = S();
-    st.fellows = st.fellows || [];
-    if (st.fellows.length) { migrate(); return; }
-    const u = U();
-    const range = XG.cfg.FELLOW_COUNT || [30, 50];
-    const n = u.randInt(range[0], range[1]);
-    const ss = u.shuffle(schools().map(function (s) { return s.id; })); // 流派均布：洗牌後輪流派發
-    const usedNames = {};
-    for (let i = 0; i < n; i++) st.fellows.push(genFellow(ss[i % ss.length], usedNames));
+    const st=S(); st.fellows=st.fellows||[];
+    migrate();
+    const usedNames={};st.fellows.forEach(f=>usedNames[f.name]=1);
+    const ids=schools().map(s=>s.id);
+    while(st.fellows.length<50) st.fellows.push(genFellow(ids[st.fellows.length%ids.length],usedNames));
   }
 
   // 舊檔字段補齊（自恢復）
@@ -540,133 +535,91 @@
     }
   }
 
-  /* ---------------- 坊市（築基5層解鎖，10 分鐘刷新 6 欄） ---------------- */
+  /* ---------------- 坊市（築基5層解鎖，每日首批＋最多五次付費換新） ---------------- */
   function marketRules() { return (XG.data.world && XG.data.world.marketRules) || { refreshSec: 600, slots: 6, priceByPersona: {}, priceByRelation: {}, stock: { kindW: {}, basePrice: {}, currencyW: {} } }; }
   function marketSt() {
-    const st = S();
-    st.fellowMarket = st.fellowMarket || { at: 0, slots: [] };
-    if(st.fellowMarket.balanceVersion!=='1.9') st.fellowMarket={at:0,slots:[],balanceVersion:'1.9'};
-    return st.fellowMarket;
+    const st=S();st.fellowMarket=st.fellowMarket||{};
+    const m=st.fellowMarket;
+    if(m.balanceVersion!=='1.9.2') {
+      if(m.day&&Array.isArray(m.slots)) {
+        m.batchIndex=m.discounted?Math.min(5,Math.max(1,XG.balance.daily().marketRefreshes||1)):0;
+        m.markup=XG.balance.marketMarkup(m.batchIndex);
+        for(const slot of m.slots) {
+          slot.originalPrice=slot.originalPrice||slot.basePrice||slot.price;
+          slot.markup=m.markup;slot.price=Math.max(1,Math.ceil(slot.originalPrice*(1+m.markup)));
+          delete slot.discount;
+        }
+      } else {m.at=0;m.slots=[];m.day='';m.batchIndex=0;m.markup=0;}
+      delete m.discounted;m.balanceVersion='1.9.2';
+    }
+    if(!Array.isArray(m.slots))m.slots=[];
+    return m;
   }
   function marketUnlocked() { return XG.cfg.isUnlocked('market'); }
-
-  function genMarket(now) {
-    const u = U();
-    const mr = marketRules();
-    const st = marketSt();
-    const p = S().player;
-    const fs = (S().fellows || []).filter(function (f) { return f.alive; });
-    st.at = now || Date.now();
-    st.slots = [];
-    if (!fs.length) return;
-    const bp = mr.stock.basePrice || {};
-    const pills = (XG.data.pills && XG.data.pills.recipes) || [];
-    const bases = (XG.data.equips && XG.data.equips.bases) || [];
-    const gfs = (XG.data.gongfa && XG.data.gongfa.list) || [];
-    const mats = XG.data.mats || {};
-    const sellPool = (XG.data.fellows.marketLines && XG.data.fellows.marketLines.sell) || [];
-    const usedRecipe = {}; // 同批丹方欄去重
-
-    for (let i = 0; i < (mr.slots || 6); i++) {
-      const seller = u.pick(fs);
-      const persona = personaOf(seller);
-      let kind = u.weighted([
-        { k: 'pill', w: mr.stock.kindW.pill || 30 }, { k: 'mat', w: mr.stock.kindW.mat || 30 },
-        { k: 'equip', w: mr.stock.kindW.equip || 20 }, { k: 'frag', w: mr.stock.kindW.frag || 15 },
-        { k: 'egg', w: mr.stock.kindW.egg || 5 }, { k: 'recipe', w: mr.stock.kindW.recipe || 8 },
-      ], 'w').k;
-      // 煉器未開（坊市已提前至築基5層）時不掛裝備欄，降級為材料，免玩家買到只能折礦的貨
-      if (kind === 'equip' && !(XG.cfg && XG.cfg.isUnlocked && XG.cfg.isUnlocked('forge'))) kind = 'mat';
-      let slot = { sid: u.uid(), uid: seller.uid, kind: kind, n: 1, sold: false, grade: 0, id: '', baseId: '' };
-
-      if (kind === 'pill') {
-        const pool = pills.filter(function (r) { return !r.hidden && r.grade <= Math.min(9, p.realmIdx + 2); });
-        if (!pool.length) continue;
-        const r = u.pick(pool);
-        slot.id = r.id; slot.name = r.name; slot.icon = r.icon; slot.grade = r.grade;
-        slot.n = u.randInt(1, 2);
-        slot.price = (bp.pillPerGrade || 200) * r.grade;
-      } else if (kind === 'mat') {
-        const g = u.clamp(Math.round(p.realmIdx / 2) + u.randInt(-1, 1), 0, 4);
-        const pool = [];
-        for (const id in mats) if (mats[id].grade === g) pool.push(id);
-        if (!pool.length) for (const id in mats) pool.push(id);
-        if (!pool.length) continue;
-        const id = u.pick(pool);
-        slot.id = id; slot.name = mats[id].name; slot.icon = mats[id].icon; slot.grade = g;
-        slot.n = u.randInt(1, 5);
-        slot.price = bp['matG' + g] || 100;
-      } else if (kind === 'equip') {
-        const g = u.clamp(Math.round(p.realmIdx / 2), 0, 3);
-        const pool = bases.filter(function (b) { return b.grade === g; });
-        if (!pool.length) continue;
-        const b = u.pick(pool);
-        slot.baseId = b.id; slot.id = b.id; slot.name = b.name; slot.icon = b.icon; slot.grade = g;
-        slot.price = (bp.equipPerGrade || 800) * Math.max(1, g);
-      } else if (kind === 'frag') {
-        const pool = gfs.filter(function (g2) { return !g2.hidden && !g2.cond && g2.grade <= Math.min(9, p.realmIdx + 1); });
-        if (!pool.length) continue;
-        const g2 = u.pick(pool);
-        slot.id = g2.id; slot.name = g2.name + '殘篇'; slot.icon = g2.icon; slot.grade = g2.grade;
-        slot.n = u.randInt(1, 3);
-        slot.price = (bp.fragPerGrade || 1500) * g2.grade;
-      } else if (kind === 'recipe') {
-        // 丹方欄：賣未習得丹方（含 merchant 隱藏方 pill_puti——其唯一習得渠道），靈玉計價不浮動
-        const known = (XG.state.alchemy && XG.state.alchemy.known) || [];
-        const pool = pills.filter(function (r) {
-          if (known.indexOf(r.id) >= 0) return false;
-          if (r.hidden && r.id !== 'pill_puti') return false;
-          return r.grade <= Math.min(9, p.realmIdx + 3);
-        });
-        if (!pool.length) continue;
-        const r = u.pick(pool);
-        if (usedRecipe[r.id]) continue; // 同批不重複
-        usedRecipe[r.id] = 1;
-        slot.id = r.id; slot.name = '丹方·' + r.name; slot.icon = r.icon; slot.grade = r.grade;
-        slot.n = 1; slot.price = r.grade * 3; slot.cur = 'lingYu'; slot.fixed = true;
-      } else { // egg
-        slot.id = 'egg'; slot.name = '靈寵蛋'; slot.icon = '🥚'; slot.grade = 1;
-        slot.price = bp.egg || 3e4;
+  function ensureMarket() {
+    const m=marketSt();
+    if(marketUnlocked()&&m.day!==XG.balance.dayKey())genMarket(Date.now(),false);
+    return m;
+  }
+  function genMarket(now,batchIndex) {
+    const u=U(),mr=marketRules(),st=marketSt(),profile=XG.balance.marketProfile();
+    const fs=(S().fellows||[]).filter(f=>f.alive);
+    if(!fs.length)return;
+    st.at=now||Date.now();st.day=XG.balance.dayKey();st.slots=[];st.profile=profile;st.batchIndex=Number(batchIndex)||0;st.markup=XG.balance.marketMarkup(st.batchIndex);
+    const bp=mr.stock.basePrice||{},pills=XG.data.pills.recipes||[],bases=XG.data.equips.bases||[];
+    const gfs=XG.data.gongfa.list||[],mats=XG.data.mats||{},usedRecipe={};
+    const lines=(XG.data.fellows.marketLines&&XG.data.fellows.marketLines.sell)||[];
+    function tierPool(list,cap,filter) {
+      const eligible=list.filter(it=>(!filter||filter(it))&&it.grade<=cap);
+      const highest=eligible.reduce((n,it)=>Math.max(n,it.grade),0);
+      return eligible.filter(it=>it.grade>=Math.max(0,highest-1));
+    }
+    // Bounded attempts; empty recipe pools reroll into another category instead of emptying the whole shop.
+    for(let attempts=0;st.slots.length<(mr.slots||6)&&attempts<120;attempts++) {
+      const seller=u.pick(fs),persona=personaOf(seller);
+      let kind=u.weighted([{k:'pill',w:30},{k:'mat',w:30},{k:'equip',w:20},{k:'frag',w:15},{k:'egg',w:5},{k:'recipe',w:8}],'w').k;
+      if(kind==='equip'&&!XG.cfg.isUnlocked('forge'))kind='mat';
+      const slot={sid:u.uid(),uid:seller.uid,kind:kind,n:1,sold:false,grade:0,id:'',baseId:''};
+      if(kind==='pill') {
+        const pool=tierPool(pills,profile.pillGrade,r=>!r.hidden);if(!pool.length)continue;
+        const r=u.pick(pool);Object.assign(slot,{id:r.id,name:r.name,icon:r.icon,grade:r.grade,n:u.randInt(1,2),price:200*r.grade});
+      } else if(kind==='mat') {
+        const pool=tierPool(Object.keys(mats).map(id=>Object.assign({id:id},mats[id])),profile.matGrade);if(!pool.length)continue;
+        const m=u.pick(pool);Object.assign(slot,{id:m.id,name:m.name,icon:m.icon,grade:m.grade,n:u.randInt(1,5),price:bp['matG'+m.grade]||100});
+      } else if(kind==='equip') {
+        const pool=tierPool(bases,profile.equipGrade,b=>!b.hidden);if(!pool.length)continue;
+        const b=u.pick(pool);Object.assign(slot,{baseId:b.id,id:b.id,name:b.name,icon:b.icon,grade:b.grade,price:800*Math.max(1,b.grade)});
+      } else if(kind==='frag') {
+        const pool=tierPool(gfs,profile.fragGrade,g=>!g.hidden&&!g.cond);if(!pool.length)continue;
+        const g=u.pick(pool);Object.assign(slot,{id:g.id,name:g.name+'殘篇',icon:g.icon,grade:g.grade,n:u.randInt(1,3),price:1500*g.grade});
+      } else if(kind==='recipe') {
+        const known=(S().alchemy&&S().alchemy.known)||[];
+        const pool=tierPool(pills,profile.recipeGrade,r=>known.indexOf(r.id)<0&&!usedRecipe[r.id]&&(!r.hidden||r.id==='pill_puti'));
+        if(!pool.length)continue;const r=u.pick(pool);usedRecipe[r.id]=1;
+        Object.assign(slot,{id:r.id,name:'丹方·'+r.name,icon:r.icon,grade:r.grade,price:r.grade*3,cur:'lingYu',fixed:true});
+      } else Object.assign(slot,{id:'egg',name:'靈寵蛋',icon:'🥚',grade:1,price:bp.egg||30000});
+      // Lucky vendors can upgrade one tier; pricing always uses the final item.
+      if(persona.id==='ouhuang'&&u.chance(OUHUANG_SLOT_P)&&['pill','equip','mat'].indexOf(kind)>=0) {
+        let pool=[];
+        if(kind==='pill')pool=pills.filter(r=>!r.hidden&&r.grade===slot.grade+1);
+        if(kind==='equip')pool=bases.filter(b=>!b.hidden&&b.grade===slot.grade+1);
+        if(kind==='mat')pool=Object.keys(mats).filter(id=>mats[id].grade===slot.grade+1).map(id=>Object.assign({id:id},mats[id]));
+        if(pool.length){const it=u.pick(pool);Object.assign(slot,{id:it.id,name:it.name,icon:it.icon,grade:it.grade});if(kind==='equip')slot.baseId=it.id;if(kind==='mat')slot.price=bp['matG'+it.grade]||slot.price;}
       }
-
-      // 歐皇貨欄：小概率超一階而售價不變（坊市傳聞）
-      if (persona.id === 'ouhuang' && u.chance(OUHUANG_SLOT_P) && slot.kind !== 'egg') {
-        if (slot.kind === 'equip') {
-          const up = bases.filter(function (b) { return b.grade === slot.grade + 1; });
-          if (up.length) { const b = u.pick(up); slot.baseId = b.id; slot.id = b.id; slot.name = b.name; slot.icon = b.icon; slot.grade++; }
-        } else if (slot.kind === 'pill') {
-          const up = pills.filter(function (r) { return !r.hidden && r.grade === slot.grade + 1; });
-          if (up.length) { const r = u.pick(up); slot.id = r.id; slot.name = r.name; slot.icon = r.icon; slot.grade++; }
-        } else if (slot.kind === 'mat') {
-          const up = [];
-          for (const id in mats) if (mats[id].grade === slot.grade + 1) up.push(id);
-          if (up.length) { const id = u.pick(up); slot.id = id; slot.name = mats[id].name; slot.icon = mats[id].icon; slot.grade++; }
-        }
+      const relation=mr.priceByRelation[seller.relation]==null?1:mr.priceByRelation[seller.relation];
+      const disc=Math.max(.7,1-((XG.stats.get().marketDiscPct||0)/100));
+      const factor=profile.priceMult*(mr.priceByPersona[seller.persona]||1)*relation*disc;
+      if(slot.fixed)slot.originalPrice=Math.max(1,Math.ceil(slot.price*profile.priceMult));
+      else {
+        slot.cur=u.weighted([{k:'lingShi',w:8},{k:'lingYu',w:2}],'w').k;
+        slot.originalPrice=XG.balance.marketPrice(slot,factor,slot.cur);
       }
-
-      // 售價 = 基準 × 性格 pricePct × 關係折讓；貨幣按權重（約兩成靈玉標價）
-      // （fixed=丹方欄：靈玉固定價，不參與浮動與貨幣重 roll）
-      if (!slot.fixed) {
-        const rel = mr.priceByRelation[seller.relation] != null ? mr.priceByRelation[seller.relation] : 1;
-        let price = slot.price * (mr.priceByPersona[seller.persona] || persona.pricePct || 1) * rel;
-        // 輪迴天賦/轉世身份坊市折扣（reincarn.getMods 輸出、stats.calc 透傳鍵 marketDiscPct；
-        // 防禦性缺省 0；下限保護最多 7 折，防疊加跌破成本）
-        let discPct = 0;
-        try { discPct = (XG.stats && XG.stats.get().marketDiscPct) || 0; } catch (e) { discPct = 0; }
-        if (!isFinite(discPct)) discPct = 0;
-        price *= Math.max(0.7, 1 - discPct / 100);
-        const cur = u.weighted([
-          { k: 'lingShi', w: (mr.stock.currencyW && mr.stock.currencyW.lingShi) || 8 },
-          { k: 'lingYu', w: (mr.stock.currencyW && mr.stock.currencyW.lingYu) || 2 },
-        ], 'w').k;
-        slot.cur = cur;
-        const baseQuote=XG.balance.marketPrice(slot,1,cur);
-        slot.price = XG.balance.marketPrice(slot,price/slot.price,cur);
-        slot.basePrice=baseQuote;
-      }
-      slot.line = sellPool.length ? fill(u.pick(sellPool), seller, { item: slot.name }) : '';
+      slot.markup=st.markup;
+      slot.price=Math.max(1,Math.ceil(slot.originalPrice*(1+slot.markup)));slot.basePrice=slot.originalPrice;
+      slot.line=lines.length?fill(u.pick(lines),seller,{item:slot.name}):'';
       st.slots.push(slot);
     }
+    XG.bus.emit('save:dirty');
   }
 
   /* ---------------- 道侶專屬劇情 news 系列 ---------------- */
@@ -689,6 +642,52 @@
     s.nextAt = now + 86400000; // 每日一折
   }
 
+  function giftLedger() {
+    const st=S();
+    if(!st.fellowGiftLedger) {
+      let total=0,claimed=0,value=0;
+      for(const f of st.fellows||[]) {
+        const n=Math.max(0,Math.floor(f.giftsReceived||0));
+        total+=n;claimed+=Math.floor(n/50);value+=Math.max(0,f.giftBatchValue||0);
+      }
+      const pending=Math.max(0,Math.floor(total/50)-claimed),remaining=total%50;
+      const units=pending*50+remaining,unitValue=units>0?value/units:0;
+      st.fellowGiftLedger={version:1,totalSent:total,returnsClaimed:claimed,pendingReturns:pending,
+        pendingValue:unitValue*pending*50,batchValue:unitValue*remaining};
+      XG.bus.emit('save:dirty');
+    }
+    return st.fellowGiftLedger;
+  }
+  // Each return is a single eligible type, bounded by 10% of that batch's gift valuation.
+  function globalReturn(batchValue) {
+    const budget=Math.max(1,Math.floor(batchValue*.1)),p=S().player,B=XG.balance;
+    const maxGrade=Math.min(9,p.realmIdx+1),eqGrade=B.marketProfile().equipGrade;
+    const pills=(XG.data.pills.recipes||[]).filter(r=>!r.hidden&&r.grade<=maxGrade&&B.pillSale(r)<=budget);
+    const equips=(XG.data.equips.bases||[]).filter(b=>!b.hidden&&b.grade<=eqGrade&&Math.floor(B.equipYu(b.grade)*500*.6)<=budget);
+    const frags=(XG.data.gongfa.list||[]).filter(g=>!g.hidden&&!g.cond&&g.grade<=maxGrade&&750*g.grade<=budget);
+    const kinds=['lingShi'];
+    if(budget>=500)kinds.push('lingYu');if(equips.length)kinds.push('equip');if(pills.length)kinds.push('pill');if(frags.length)kinds.push('frag');
+    const donors=(S().fellows||[]).filter(f=>f.alive&&(f.giftsReceived||0)>0);
+    const donor=U().pick(donors)||null,kind=U().pick(kinds);
+    const result={kind:kind,fromUid:donor?donor.uid:null,fromName:donor?donor.name:'道友們',value:0,desc:'',n:1};
+    if(kind==='lingYu') {
+      result.n=Math.max(1,Math.min(Math.floor(budget/500),p.realmIdx+2));result.value=result.n*500;
+      result.desc='靈玉×'+result.n;XG.addRes({lingYu:result.n});
+    } else if(kind==='equip') {
+      const b=U().pick(equips),eq=XG.sys.forge&&XG.sys.forge.createEquip(b.id,b.grade);
+      if(eq){result.id=eq.uid;result.value=Math.floor(B.equipYu(b.grade)*500*.6);result.desc=b.name+'×1';}
+      else {result.kind='lingShi';result.n=budget;result.value=budget;result.desc='靈石×'+budget;XG.addRes({lingShi:budget});}
+    } else if(kind==='pill') {
+      const r=U().pick(pills);result.id=r.id;result.value=B.pillSale(r);result.desc=r.name+'×1';XG.addRes({pill:{[r.id]:1}});
+    } else if(kind==='frag') {
+      const g=U().pick(frags);result.id=g.id;result.value=750*g.grade;result.desc=g.name+'殘片×1';
+      if(XG.sys.gongfa&&XG.sys.gongfa.addFrag)XG.sys.gongfa.addFrag(g.id,1);else XG.addRes({frag:{[g.id]:1}});
+    } else {result.n=budget;result.value=budget;result.desc='靈石×'+budget;XG.addRes({lingShi:budget});}
+    if(donor){donor.gifts=(donor.gifts||0)+1;XG.bus.emit('fellow:gift',{uid:donor.uid,persona:donor.persona,ouhuang:false});}
+    pushNews('fellow',result.fromName+'託人送來回禮：'+result.desc+'。仙界的人情往來，終於不是已讀不回！',1,result.fromUid);
+    return result;
+  }
+
   /* ---------------- 系統註冊 ---------------- */
   XG.sys.fellows = {
     id: 'fellows',
@@ -697,11 +696,12 @@
     init() {
       try {
         ensureFellows();
+        giftLedger();
         if (XG.character) XG.character.normalize();
         marketSt();
         S().fellowWeek = S().fellowWeek || { wid: U().weekId(), player: 0, rivals: {} };
         dailyHelp(); // 僅跨天/缺檔才重搖（曾誤用 rollDailyHelp：每次加載都清空重搖，致「有求於你」傳聞與求助列表脫節）
-        if (marketUnlocked() && !marketSt().slots.length) genMarket(Date.now());
+        ensureMarket();
         subscribe();
       } catch (e) {
         console.error('[fellows] init 失敗', e);
@@ -712,11 +712,11 @@
     tick(dt) {
       // 求助到點重搖（dailyHelp 內部按 4 小時間隔判定）
       dailyHelp();
-      // 坊市到點刷新
+      // 坊市只在跨日時產生首批，十分鐘步進不再換新
       if (marketUnlocked()) {
         const mr = marketRules();
         const st = marketSt();
-        if (!st.slots.length || Date.now() - st.at >= (mr.refreshSec || 600) * 1000) genMarket(Date.now());
+        ensureMarket();
       }
       // 成長步進
       this._acc += dt;
@@ -734,10 +734,10 @@
       const buf = { count: 0, samples: [] };
       const now = Date.now();
       for (let i = 0; i < steps; i++) doStep(now, buf);
-      // 坊市按流逝時間補刷新
+      // 離線返回只補當日首批，不補十分鐘刷新
       if (marketUnlocked()) {
         const mr = marketRules();
-        if (now - marketSt().at >= (mr.refreshSec || 600) * 1000) genMarket(now);
+        ensureMarket();
       }
       if (!steps || !buf.count) return null;
       const fellowNews = ['閉關這些時日，道友圈共傳出 ' + buf.count + ' 樁動靜，最引人側目的有：'];
@@ -783,6 +783,7 @@
         state: f.state, favor: f.favor, relation: f.relation,
         power: Math.round(fellowPower(f)), reincarn: f.reincarn,
         lastNews: f.lastNews || '',
+        giftsReceived:f.giftsReceived||0,giftReturnIn:50-(giftLedger().totalSent%50),globalGiftsSent:giftLedger().totalSent,
         canDiscuss: this.canDiscuss(f.uid),
       };
     },
@@ -942,15 +943,83 @@
       return { ok: true, msg: '已婉拒' + (f ? f.name : '對方') + '的求助。', text: text };
     },
 
+    giftProgress() {
+      const l=giftLedger();return {totalSent:l.totalSent,nextIn:50-l.totalSent%50,pendingReturns:l.pendingReturns,returnsClaimed:l.returnsClaimed};
+    },
+    claimGiftReturns() {
+      if(!XG.cfg.isUnlocked('fellows'))return {ok:false,msg:'道友尚未解鎖。',rewards:[]};
+      const l=giftLedger(),rewards=[];
+      for(let i=0;i<20&&l.pendingReturns>0;i++) {
+        const share=l.pendingValue/l.pendingReturns;
+        const reward=globalReturn(share);rewards.push(reward);
+        l.pendingValue=Math.max(0,l.pendingValue-share);l.pendingReturns--;l.returnsClaimed++;
+      }
+      if(rewards.length){XG.bus.emit('res:changed');XG.bus.emit('save:dirty');}
+      return {ok:rewards.length>0,rewards:rewards,count:rewards.length,
+        msg:rewards.length?rewards.map(r=>r.fromName+'回禮：'+r.desc).join('；'):'暫無待領回禮。'};
+    },
+    giftItems() {
+      const out=[],st=S(),B=XG.balance;
+      const bases=XG.data.equips.bases||[];
+      for(const eq of st.equips.list) {
+        if(Object.keys(st.equips.slots).some(k=>st.equips.slots[k]===eq.uid))continue;
+        const base=bases.find(b=>b.id===eq.baseId);if(!base)continue;
+        const value=Math.floor(Math.min(B.equipYu(eq.grade)*500,Number.isFinite(eq.marketPaidStone)?eq.marketPaidStone:Infinity)*.6);
+        out.push({kind:'equip',id:eq.uid,name:base.name+'（強化+'+(eq.enh||0)+'）',count:1,value:value});
+      }
+      for(const id in st.inv.pill) {
+        if(st.inv.pill[id]<=0)continue;const base=id.replace(/_star$/,'');
+        const r=XG.data.pills.recipes.find(r=>r.id===base);if(!r)continue;
+        out.push({kind:'pill',id:id,name:r.name+(base!==id?'·極品':''),count:st.inv.pill[id],value:B.pillSaleQuote(id,r).price});
+      }
+      const ids=new Set(Object.keys(st.gongfa.frag||{}).concat(Object.keys(st.inv.frag||{})));
+      for(const id of ids) {
+        const count=(st.gongfa.frag[id]||0)+(st.inv.frag[id]||0);if(count<=0)continue;
+        const def=(XG.data.gongfa.list||[]).concat(st.gongfa.custom||[]).find(g=>g.id===id);if(!def)continue;
+        out.push({kind:'frag',id:id,name:def.name+'殘片',count:count,value:750*(def.grade||1)});
+      }
+      return out;
+    },
+    sendGift(uid,kind,id) {
+      if(!XG.cfg.isUnlocked('fellows'))return {ok:false,msg:'道友尚未解鎖。'};
+      const f=findFellow(uid);if(!f||!f.alive)return {ok:false,msg:'這位道友暫時不在。'};
+      const item=this.giftItems().find(it=>it.kind===kind&&it.id===id);
+      if(!item)return {ok:false,msg:'禮物已不在揹包，或裝備還穿在身上。'};
+      if(kind==='equip') {if(!XG.sys.forge.takeGift(id))return {ok:false,msg:'裝備暫時不能送出。'};}
+      else if(kind==='pill')XG.addRes({pill:{[id]:-1}});
+      else if(kind==='frag') {
+        if((S().gongfa.frag[id]||0)>0){S().gongfa.frag[id]--;if(!S().gongfa.frag[id])delete S().gongfa.frag[id];}
+        else XG.addRes({frag:{[id]:-1}});
+      } else return {ok:false,msg:'這種禮物暫時不收。'};
+      const ledger=giftLedger();
+      const before=f.favor||0;
+      const gain=Math.max(1,Math.min(8,1+Math.floor(Math.log10(1+Math.max(0,item.value)/100))));
+      f.favor=U().clamp(before+gain,0,100);
+      if(f.relation==='stranger'&&f.favor>=FAVOR_FRIEND)f.relation='friend';
+      f.giftsReceived=(f.giftsReceived||0)+1;
+      ledger.totalSent++;ledger.batchValue+=Math.max(0,item.value);
+      if(ledger.totalSent%50===0){ledger.pendingReturns++;ledger.pendingValue+=ledger.batchValue;ledger.batchValue=0;}
+      const returned=this.claimGiftReturns();
+      maxStat('fellow_favor_max',f.favor);bumpStat('fellow_gifts_sent');
+      XG.bus.emit('res:changed');XG.bus.emit('save:dirty');
+      return {ok:true,returnLingShi:returned.rewards.filter(r=>r.kind==='lingShi').reduce((n,r)=>n+r.n,0),
+        returns:returned.rewards,giftsReceived:f.giftsReceived,globalGiftsSent:ledger.totalSent,favorGain:f.favor-before,
+        msg:'送給'+f.name+'「'+item.name+'」×1，好感+'+(f.favor-before)+'。全體累計'+ledger.totalSent+'次。'+
+          (returned.ok?returned.msg:'距下次回禮尚餘'+(50-ledger.totalSent%50)+'次。')};
+    },
+
     /* -------- 坊市 -------- */
     market() {
-      const st = marketSt();
+      const st = ensureMarket();
       const mr = marketRules();
       const now = Date.now();
+      const refresh=XG.balance.marketRefreshInfo();
+      const midnight=new Date();midnight.setHours(24,0,0,0);
       return {
         unlocked: marketUnlocked(),
         refreshAt: st.at,
-        nextInSec: Math.max(0, Math.ceil((st.at + (mr.refreshSec || 600) * 1000 - now) / 1000)),
+        nextInSec:Math.max(0,Math.ceil((midnight.getTime()-now)/1000)),
+        refreshUsed:refresh.used,refreshLeft:refresh.left,refreshCost:refresh.cost,nextMarkup:refresh.nextMarkup,batchMarkup:st.markup||0,profile:st.profile,
         slots: st.slots.map(function (s) {
           const f = findFellow(s.uid);
           return {
@@ -959,7 +1028,7 @@
             kind: s.kind, id: s.id, baseId: s.baseId || '', grade: s.grade,
             n: s.n, name: s.name, icon: s.icon,
             price: s.price, cur: s.cur, curName: s.cur === 'lingYu' ? '靈玉' : '靈石',
-            basePrice:s.basePrice, dailyLeft:s.kind==='pill'?Math.max(0,3-(XG.balance.daily().purchases[s.id]||0)):null,
+            originalPrice:s.originalPrice,markup:s.markup||0,basePrice:s.originalPrice||s.basePrice, dailyLeft:s.kind==='pill'?Math.max(0,3-(XG.balance.daily().purchases[s.id]||0)):null,
             sold: !!s.sold || s.n <= 0 || (s.kind==='pill'&&(XG.balance.daily().purchases[s.id]||0)>=3), line: s.line || '',
           };
         }),
@@ -968,7 +1037,7 @@
 
     buyMarket(sid) {
       if (!marketUnlocked()) return { ok: false, msg: '坊市尚未開啓（築基5層解鎖）。' };
-      const st = marketSt();
+      const st = ensureMarket();
       let slot = null;
       for (const s of st.slots) if (s.sid === sid) { slot = s; break; }
       if (!slot) return { ok: false, msg: '這宗買賣已不在了。' };
@@ -987,7 +1056,10 @@
       // 交付
       let got = slot.name;
       if (slot.kind === 'mat') XG.addRes({ mat: { [slot.id]: 1 } });
-      else if (slot.kind === 'pill') XG.addRes({ pill: { [slot.id]: 1 } });
+      else if (slot.kind === 'pill') {
+        XG.addRes({ pill: { [slot.id]: 1 } });
+        XG.balance.recordMarketPill(slot.id,slot.price*(slot.cur==='lingYu'?500:1));
+      }
       else if (slot.kind === 'egg') XG.addRes({ egg: 1 });
       else if (slot.kind === 'recipe') {
         const al = XG.sys.alchemy;
@@ -1005,7 +1077,7 @@
         else XG.addRes({ frag: { [slot.id]: 1 } }); // 降級：直接入殘篇袋
       } else if (slot.kind === 'equip') {
         const fg = XG.sys.forge;
-        if (fg && typeof fg.createEquip === 'function') fg.createEquip(slot.baseId, slot.grade);
+        if (fg && typeof fg.createEquip === 'function') {const eq=fg.createEquip(slot.baseId,slot.grade);if(eq)eq.marketPaidStone=slot.price*(slot.cur==='lingYu'?500:1);}
         else { // 降級：發等階礦石
           const oreByGrade = { 0: 'ore_heite', 1: 'ore_xuantie', 2: 'ore_miyin', 3: 'ore_hantie', 4: 'ore_xingchenjin' };
           const oid = oreByGrade[slot.grade] || 'ore_heite';
@@ -1024,13 +1096,17 @@
       return { ok: true, msg: '購得 ' + got + '，花費' + slot.price + (slot.cur === 'lingYu' ? '靈玉' : '靈石') + '。' + line };
     },
 
-    // 靈玉×5 立即刷新
+    // 每日五次：5／10／20／40／80靈玉
     refreshMarket() {
       if (!marketUnlocked()) return { ok: false, msg: '坊市尚未開啓（築基5層解鎖）。' };
-      if (!XG.hasRes({ lingYu: MARKET_MANUAL_COST })) return { ok: false, msg: '靈玉不足（需×' + MARKET_MANUAL_COST + '）。' };
-      XG.addRes({ lingYu: -MARKET_MANUAL_COST });
-      genMarket(Date.now());
-      return { ok: true, msg: '坊市已換新一批貨色。' };
+      ensureMarket();
+      const info=XG.balance.marketRefreshInfo();
+      if(!info.left)return {ok:false,msg:'今日5次換新已用完，明日再逛，掌櫃也要下班。'};
+      if(!XG.hasRes({lingYu:info.cost}))return {ok:false,msg:'靈玉不足（本次需'+info.cost+'）。'};
+      XG.addRes({lingYu:-info.cost});
+      XG.balance.daily().marketRefreshes=info.used+1;
+      genMarket(Date.now(),info.used+1);
+      return {ok:true,cost:info.cost,msg:'第'+(info.used+1)+'次換新完成！本批全品項按原價加'+Math.round(XG.balance.marketMarkup(info.used+1)*100)+'%，今日尚餘'+(info.left-1)+'次。'};
     },
 
     /* -------- 道侶 -------- */

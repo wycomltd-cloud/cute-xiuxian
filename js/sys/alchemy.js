@@ -395,7 +395,7 @@
     if (!Number.isFinite(cost) || cost < 0) return null;
     const count = (XG.state.inv.pill || {})[pillId] || 0;
     return { id: pillId, name: r.name + (baseIdOf(pillId) !== pillId ? '·極品' : ''),
-      craftLingShi: cost, price: Math.floor(cost * 0.6), count: count };
+      craftLingShi: cost, price: XG.balance.pillSaleQuote(pillId,r).price, marketCapped:XG.balance.pillSaleQuote(pillId,r).capped, count: count };
   }
   function sellPill(pillId) {
     const info = saleInfo(pillId);

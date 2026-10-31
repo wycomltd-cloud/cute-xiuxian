@@ -57,7 +57,10 @@
     if (delta.lingShi) st.res.lingShi = Math.max(0, (st.res.lingShi || 0) + delta.lingShi);
     if (delta.lingYu) st.res.lingYu = Math.max(0, (st.res.lingYu || 0) + delta.lingYu);
     if (delta.mat) addBag(st.inv.mat, delta.mat);
-    if (delta.pill) addBag(st.inv.pill, delta.pill);
+    if (delta.pill) {
+      if(XG.balance) for(const id in delta.pill) if(delta.pill[id]<0) XG.balance.consumeMarketPills(id,Math.min(st.inv.pill[id]||0,-delta.pill[id]));
+      addBag(st.inv.pill, delta.pill);
+    }
     if (delta.frag) addBag(st.inv.frag, delta.frag);
     if (delta.egg) st.inv.egg = Math.max(0, (st.inv.egg || 0) + delta.egg);
     XG.bus.emit('res:changed');

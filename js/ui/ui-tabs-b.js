@@ -990,7 +990,7 @@
     if (!cf.ok) {
       h = '<div class="card-sub">' + esc(cf.reason || '暫不可論劍') + '</div>';
     } else if (!pv.opp) {
-      h = '<div class="tbb-rowline"><span class="muted">匹配戰力相近之道友，三局兩勝定高下。</span><span class="tbb-sp"></span>'
+      h = '<div class="tbb-rowline"><span class="muted">切磋基礎戰力與主角相等，五修剋制與隨機發揮另計，三局兩勝。</span><span class="tbb-sp"></span>'
         + '<button class="btn btn-primary" data-act="pvp-match">尋敵論劍</button></div>'
         + '<div class="tbb-rowline" style="margin-top:4px">'
         + '<button class="btn tbb-mini' + (pv.auto ? ' btn-primary' : '') + '" data-act="pvp-auto">⚔ 連戰：' + (pv.auto ? '開' : '關') + '</button>'
@@ -998,6 +998,7 @@
         + (pv.lastRes ? pvpLastResHtml() : '');
     } else {
       const o = pv.opp;
+      o.power=myPower();
       const wp = estWinP(o);
       h = '<div class="tbb-opp"><div class="tbb-rowline"><b style="font-size:15px">' + esc(o.name) + ' ' + esc(XG.character.symbol(o.gender)) + '</b>'
         + '<span class="muted">' + esc(realmTxt(o.realmIdx, o.layer)) + '</span>'

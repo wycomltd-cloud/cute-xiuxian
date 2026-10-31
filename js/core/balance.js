@@ -3,7 +3,7 @@
   'use strict';
   const XG = window.XG;
   const B = XG.balance = {
-    version: '1.9',
+    version: '1.9.2',
     targetHours: [1/3,24,48,96,120,144,168,192,216],
     exploreHourly: [300,1000,3000,8000,20000,40000,70000,110000,160000,160000],
     petGradeMult: [1,1,1.4,1.8,2.3,3],
@@ -14,6 +14,44 @@
       const d=st.balanceDaily;
       if (!d.purchases) d.purchases={};
       return d;
+    },
+    marketProfile() {
+      const p=XG.state.player, base=XG.cfg.POWER(XG.cfg.REALM_BASE[0]);
+      const power=Math.max(1,XG.stats.get().power||1);
+      const powerStage=Math.max(0,Math.log(Math.max(base,power)/base)/Math.log(6));
+      const tier=(Math.max(0,p.realmIdx)+powerStage)/2;
+      return {power:power,realmIdx:p.realmIdx,tier:tier,
+        pillGrade:Math.min(9,1+Math.floor(tier)),matGrade:Math.min(4,Math.floor(tier/2)),
+        equipGrade:Math.min(4,Math.floor(tier/2)),fragGrade:Math.min(9,1+Math.floor(tier)),
+        recipeGrade:Math.min(9,2+Math.floor(tier)),priceMult:1+.15*tier};
+    },
+    marketMarkup(index) { return [0,.2,.3,.4,.5,.5][Math.min(5,Math.max(0,Math.floor(index||0)))]; },
+    marketRefreshInfo() {
+      const used=this.daily().marketRefreshes||0;
+      return {used:used,left:Math.max(0,5-used),cost:used<5?5*Math.pow(2,used):null,nextMarkup:used<5?this.marketMarkup(used+1):null};
+    },
+    pillLots(id) {
+      const st=XG.state; st.marketPillLots=st.marketPillLots||{};
+      const lots=st.marketPillLots[id]||[];
+      let remaining=Math.max(0,(st.inv.pill||{})[id]||0);
+      const clean=[];
+      for(const lot of lots) {
+        const n=Math.min(remaining,Math.max(0,Math.floor(lot.n||0)));
+        if(n && Number.isFinite(lot.paidStone) && lot.paidStone>=0) {clean.push({n:n,paidStone:lot.paidStone});remaining-=n;}
+      }
+      st.marketPillLots[id]=clean; return clean;
+    },
+    recordMarketPill(id,paidStone) {
+      const lots=this.pillLots(id),last=lots[lots.length-1];
+      if(last&&last.paidStone===paidStone)last.n++;else lots.push({n:1,paidStone:paidStone});
+    },
+    consumeMarketPills(id,n) {
+      const lots=this.pillLots(id);let left=n;
+      while(left>0&&lots.length){const take=Math.min(left,lots[0].n);lots[0].n-=take;left-=take;if(!lots[0].n)lots.shift();}
+    },
+    pillSaleQuote(id,r) {
+      const lots=this.pillLots(id),base=this.pillSale(r);
+      return {price:lots.length?Math.min(base,Math.floor(lots[0].paidStone*.6)):base,capped:lots.length>0};
     },
     standardRate() {
       const p=XG.state.player, r=XG.cfg.REALMS[p.realmIdx];
