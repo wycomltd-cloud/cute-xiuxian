@@ -3,7 +3,7 @@
   'use strict';
   const XG = window.XG;
   const B = XG.balance = {
-    version: '2.0.2',
+    version: '2.0.3',
     targetHours: [1/3,24,48,96,120,144,168,192,216],
     exploreHourly: [180,600,1800,4800,12000,24000,42000,66000,96000,96000],
     petGradeMult: [1,1,1.4,1.8,2.3,3],

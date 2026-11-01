@@ -1057,7 +1057,7 @@
         chips.push({ tab: 'market', label: '坊市新貨', mkt: 1 });
       }
     }
-    if(XG.sys.sect&&XG.sys.sect.active()){const si=XG.sys.sect.info();if(si.task)chips.unshift({tab:'sect',label:'宗門事務'});if(!si.teachWait)chips.push({tab:'sect',label:'授業開課'});if(si.payReady.length)chips.push({tab:'sect',label:'俸祿待領'});}
+    if(XG.sys.sect&&XG.sys.sect.active()){const si=XG.sys.sect.info();if(si.taskPending)chips.unshift({tab:'sect',label:'宗門事務 ×'+si.taskPending});if(si.teachPending)chips.push({tab:'sect',label:'待授業 ×'+si.teachPending});if(si.payReady.length)chips.push({tab:'sect',label:'俸祿待領'});}
     const html = chips.map(function (c) {
       if (c.adv) return '<span class="xgh-chip xgh-chip-adv" data-act="adv-open"><span class="xgh-dot"></span>' + esc(c.label) + '</span>';
       return '<span class="xgh-chip" data-act="remind" data-tab="' + esc(c.tab) + '"' + (c.mkt ? ' data-mkt="1"' : '') + '><span class="xgh-dot"></span>' + esc(c.label) + '</span>';

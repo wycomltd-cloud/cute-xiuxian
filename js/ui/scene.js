@@ -146,7 +146,7 @@
     scene.classList.toggle('is-biguan', big); scene.classList.toggle('is-dunwu', !!dw.active);
     scene.querySelector('#cute-scene-mode').textContent = dw.active ? '靈感插隊！頓悟 ×5' : big ? '認真躺平中 · 修煉 ×1.3' : '仙氣自動補貨中';
     const inSect=XG.sys.sect&&XG.sys.sect.active();
-    const advButton=scene.querySelector('.cute-adventure');advButton.hidden=inSect?!XG.sys.sect.info().task:!XG.sys.adventure.getPending();advButton.textContent=inSect?'📋 宗門有事找你':'✨ 奇遇來敲門';
+    const advButton=scene.querySelector('.cute-adventure');advButton.hidden=inSect?!XG.sys.sect.info().task:!XG.sys.adventure.getPending();advButton.textContent=inSect?'📋 宗門事務 ×'+XG.sys.sect.info().taskPending:'✨ 奇遇來敲門';
     if(inSect)scene.querySelector('#cute-scene-place').textContent=XG.sys.sect.school().name+'・'+XG.sys.sect.school().place;
     const pets = XG.sys.pets.teamList() || [];
     const html = pets.slice(0, 3).map(function (p) { return '<span class="cute-scene-pet" title="' + XG.util.esc(p.name || '靈寵') + '">' + XG.util.esc(p.icon || '🐾') + '</span>'; }).join('');

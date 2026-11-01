@@ -1073,7 +1073,7 @@
       + '<label class="row" style="cursor:pointer"><input type="checkbox" data-act="st-news"' + (st.newsCollapsed ? ' checked' : '') + '> 摺疊頂部傳聞滾動條</label></div>';
 
     html += '<div class="card"><h3 class="card-title">ℹ️ 關於</h3>'
-      + '<div class="xtc-kv"><span>版本</span><b>摸魚修仙 Cute v2.0.2（存檔 ver ' + ((XG.state && XG.state.ver) || 1) + '）</b></div>'
+      + '<div class="xtc-kv"><span>版本</span><b>摸魚修仙 Cute v2.0.3（存檔 ver ' + ((XG.state && XG.state.ver) || 1) + '）</b></div>'
       + '<div class="xtc-kv"><span>本世主角</span><b>' + genderBadge((XG.state.player || {}).gender) + ' ' + esc(XG.character.label((XG.state.player || {}).gender)) + '主角</b></div><div class="muted">成功輪回後可重新選擇性別。</div>'
       + '<div class="card-sub" style="margin:6px 0 4px">系統解鎖進度一覽</div>'
       + '<p class="cute-about">原作：shanawakiminouso-hub／xiuxian-idle，MIT 授權。可愛插畫與介面為本版新增。<a href="LICENSE" target="_blank">查看授權</a> · <a href="CUTE-README.md" target="_blank">遊戲說明</a></p><div data-r="stunlock">' + unlockListHtml() + '</div></div>';
