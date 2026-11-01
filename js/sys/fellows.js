@@ -94,6 +94,7 @@
   function giveCult(n, src) {
     n = Math.max(0, Math.floor(n));
     if (!n) return 0;
+    XG.balance.applyActivityToxicity(n);
     const c = XG.sys.cultivation;
     if (c && typeof c.addCult === 'function') c.addCult(n, src);
     else { S().player.cult = (S().player.cult || 0) + n; XG.bus.emit('res:changed'); }
@@ -831,7 +832,7 @@
       const budget=XG.balance.daily(), used=budget.discuss||0;
       budget.discuss=used+1;
       const higher=1+Math.min(.2,Math.max(0,f.realmIdx-S().player.realmIdx)*.1);
-      const cult = giveCult(XG.balance.standardRate()*u.randInt(2,4)*higher, '與' + f.name + '論道');
+      const cult = XG.sys.sect&&XG.sys.sect.active()?0:giveCult(XG.balance.boostActivityCult(XG.balance.standardRate()*u.randInt(2,4)*higher), '與' + f.name + '論道');
       XG.bus.emit('save:dirty');
       const favorAdd = u.clamp(Math.round(u.rand(2, 4) * (persona.favorGain || 1)), 1, 8);
       f.favor = u.clamp(f.favor + favorAdd, 0, 100);

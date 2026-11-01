@@ -217,10 +217,10 @@
     try { cnt = fs.count() || cnt; } catch (e) {}
     html += '<div class="card-sub" style="margin:4px 2px 8px">道友 ' + fmtInt(cnt.total)
       + ' 人 · 摯友 ' + fmtInt(cnt.friend) + ' · 宿敵 ' + fmtInt(cnt.rival) + ' · 道侶 ' + fmtInt(cnt.partner) + '</div>';
-    html += '<div class="row" style="margin:0 2px 8px"><button class="btn btn-primary" data-act="f-discuss-all">🍵 一鍵煮茶論道</button></div>';
+    html += '<div class="row" style="margin:0 2px 8px"><button class="btn btn-primary" data-act="f-discuss-all">'+(XG.sys.sect&&XG.sys.sect.active()?'🍵 一鍵拜訪道友':'🍵 一鍵煮茶論道')+'</button></div>';
     const gift=fs.giftProgress();
     html+='<div class="card-sub">🎁 全體送禮累計 '+gift.totalSent+' 次，再送 '+gift.nextIn+' 次有一位道友回禮。可獲靈石／靈玉／裝備／丹藥／殘片。'+(gift.pendingReturns?'<button class="btn btn-primary" data-act="f-claim-gifts">領取待領回禮 ×'+gift.pendingReturns+'</button>':'')+'</div>';
-    html+='<div class="muted">論道每次都有修為與好感，同一道友需調息10分鐘。</div>';
+    html+='<div class="muted">'+(XG.sys.sect&&XG.sys.sect.active()?'入宗後與道友交流增加好感，修行報酬請到宗門授業領取。':'論道每次都有修為與好感，同一道友需調息10分鐘。金丹後散修活動修為較多，也會累積少量丹毒。')+'</div>';
     let list = [];
     try { list = fs.list() || []; } catch (e) { list = []; }
     if (!list.length) html += '<div class="card xtc-lock">四下無人，待境界高深自有機緣結識。</div>';
@@ -275,7 +275,7 @@
     const btns = [];
     if (f.relation !== 'partner') {
       btns.push({
-        text: f.canDiscuss ? '煮茶論道' : '靜思中，稍後再論',
+        text: f.canDiscuss ? (XG.sys.sect&&XG.sys.sect.active()?'閒聊敘舊':'煮茶論道') : '靜思中，稍後再論',
         cls: f.canDiscuss ? 'btn-primary' : 'btn-ghost',
         cb: function () { doDiscuss(el, uid); },
       });
@@ -1073,7 +1073,7 @@
       + '<label class="row" style="cursor:pointer"><input type="checkbox" data-act="st-news"' + (st.newsCollapsed ? ' checked' : '') + '> 摺疊頂部傳聞滾動條</label></div>';
 
     html += '<div class="card"><h3 class="card-title">ℹ️ 關於</h3>'
-      + '<div class="xtc-kv"><span>版本</span><b>摸魚修仙 Cute v1.9.4（存檔 ver ' + ((XG.state && XG.state.ver) || 1) + '）</b></div>'
+      + '<div class="xtc-kv"><span>版本</span><b>摸魚修仙 Cute v2.0.2（存檔 ver ' + ((XG.state && XG.state.ver) || 1) + '）</b></div>'
       + '<div class="xtc-kv"><span>本世主角</span><b>' + genderBadge((XG.state.player || {}).gender) + ' ' + esc(XG.character.label((XG.state.player || {}).gender)) + '主角</b></div><div class="muted">成功輪回後可重新選擇性別。</div>'
       + '<div class="card-sub" style="margin:6px 0 4px">系統解鎖進度一覽</div>'
       + '<p class="cute-about">原作：shanawakiminouso-hub／xiuxian-idle，MIT 授權。可愛插畫與介面為本版新增。<a href="LICENSE" target="_blank">查看授權</a> · <a href="CUTE-README.md" target="_blank">遊戲說明</a></p><div data-r="stunlock">' + unlockListHtml() + '</div></div>';

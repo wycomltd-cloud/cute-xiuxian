@@ -871,6 +871,7 @@
       const r = map[String(id).replace(/_star$/, '')];
       if (r && r.eff && TYPES[r.eff.type] && (bag[id] || 0) > 0) n += bag[id];
     }
+    if(XG.sys.sect)n+=XG.sys.sect.info().pills.reduce((sum,p)=>sum+p.n,0);
     return n;
   }
   function refreshQuick() {
@@ -883,6 +884,7 @@
       const pend = call('pets', 'pending');
       if (!collect && pend && (pend.lingShi >= 1 || (pend.mat && Object.keys(pend.mat).length))) collect = true;
     } catch (e) { /* 忽略 */ }
+    if(XG.sys.sect&&XG.sys.sect.info().payReady.length)collect=true;
     st.collect = { can: collect, why: collectWhy };
     // 一鍵修煉：有修為丹/增益丹
     const pillN = countCultPills();
@@ -1039,7 +1041,7 @@
       const list = call('fellows', 'list') || [];
       let dn = 0;
       for (const f of list) if (f.canDiscuss) dn++;
-      if (dn > 0) chips.push({ tab: 'fellows', label: '論道 ×' + dn });
+      if (dn > 0 && !(XG.sys.sect&&XG.sys.sect.active())) chips.push({ tab: 'fellows', label: '論道 ×' + dn });
       const helps = call('fellows', 'listHelp') || [];
       let hn = 0;
       for (const h of helps) if (!h.done) hn++;
@@ -1055,6 +1057,7 @@
         chips.push({ tab: 'market', label: '坊市新貨', mkt: 1 });
       }
     }
+    if(XG.sys.sect&&XG.sys.sect.active()){const si=XG.sys.sect.info();if(si.task)chips.unshift({tab:'sect',label:'宗門事務'});if(!si.teachWait)chips.push({tab:'sect',label:'授業開課'});if(si.payReady.length)chips.push({tab:'sect',label:'俸祿待領'});}
     const html = chips.map(function (c) {
       if (c.adv) return '<span class="xgh-chip xgh-chip-adv" data-act="adv-open"><span class="xgh-dot"></span>' + esc(c.label) + '</span>';
       return '<span class="xgh-chip" data-act="remind" data-tab="' + esc(c.tab) + '"' + (c.mkt ? ' data-mkt="1"' : '') + '><span class="xgh-dot"></span>' + esc(c.label) + '</span>';
@@ -1298,6 +1301,7 @@
     });
   }
   function quickCultivate() {
+    const sectResult=call('sect','quickCultivate')||{n:0,cult:0};
     const bag = (S().inv && S().inv.pill) || {};
     const TYPES = { cult: 1, atk: 1, def: 1, hp: 1, work: 1 };
     const recipes = (XG.data && XG.data.pills && XG.data.pills.recipes) || [];
@@ -1310,9 +1314,9 @@
       if (!r || !r.eff || !TYPES[r.eff.type] || (bag[id] || 0) <= 0) continue;
       plan.push({ id: id, n: bag[id], eff: r.eff, star: /_star$/.test(id) });
     }
-    if (!plan.length) { toast('囊中沒有修為丹或增益丹可服', 'info'); return; }
+    if (!plan.length) { toast(sectResult.n?sectResult.msg:'囊中沒有可服用的修為丹或增益丹',sectResult.n?'gold':'info');homeUpdate();return; }
     if (!sys('alchemy') || typeof sys('alchemy').usePill !== 'function') { toast('丹道未開，無法服丹', 'red'); return; }
-    let ate = 0, cultSum = 0, blocked = 0;
+    let ate = sectResult.n||0, cultSum = sectResult.cult||0, blocked = 0;
     for (const it of plan) {
       for (let i = 0; i < it.n; i++) {
         const r = call('alchemy', 'usePill', [it.id]);
@@ -1407,6 +1411,7 @@
         '<div class="cute-page-head"><div><h2>修行日常 <span style="font-size:17px">🌿</span></h2><p>不急著成仙，先把今天過得可愛一點。</p></div><span class="cute-page-tag">SLOW DAYS, LITTLE MAGIC</span></div>' +
         '<div class="xgh-reminds" id="xgh-reminds"></div>' +
         // ⓪ 修煉場景（scene.js 掛載點：盤坐小人+靈氣動畫+事件聯動）
+        '<div id="sect-home-banner"></div>' +
         '<div id="scene-root" class="xgh-scene"></div>' +
         // ① 境界大卡
         '<div class="card cute-realm-card"><h2 class="card-title">今日修仙進度</h2>' +

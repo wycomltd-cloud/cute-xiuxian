@@ -214,6 +214,7 @@
   /* ---------------- 跨系統發獎助手（全部防禦性，目標不在則降級不報錯） ---------------- */
   function giveCult(n, src) {
     if (!n) return;
+    XG.balance.applyActivityToxicity(n);
     const cu = XG.sys.cultivation;
     if (cu && typeof cu.addCult === 'function') {
       try { cu.addCult(n, src); return; } catch (e) { /* 降級 */ }
@@ -286,8 +287,9 @@
     }
     // 經脈全通：折成修為補償（30 分鐘檔）
     const rate = realmRate();
-    giveCult(rate * 1800, '奇遇·經脈圓滿');
-    return '經脈俱已貫通，化作修為 +' + XG.util.fmt(rate * 1800);
+    const gain=XG.balance.boostActivityCult(rate*1800);
+    giveCult(gain, '奇遇·經脈圓滿');
+    return '經脈俱已貫通，化作修為 +' + XG.util.fmt(gain);
   }
 
   function realmRate() {
@@ -360,6 +362,7 @@
   function rollCd() { return XG.util.randInt(CD_MIN, CD_MAX); }
 
   function isUnlocked() {
+    if(XG.sys.sect&&XG.sys.sect.active())return false;
     try { return XG.cfg.isUnlocked('adventure'); } catch (e) { return true; }
   }
 
@@ -382,6 +385,7 @@
     const p = XG.state.player;
     const msg = result.msg, rw = result.rewards;
     const src = '奇遇·' + e.title;
+    const toxBefore=p.toxicity||0;
     // 奇遇獎勵隨境界縮放
     const scale = rewardScale(e);
     const sc = function (v) { return Math.max(1, Math.floor((v || 0) * scale)); };
@@ -417,8 +421,6 @@
       const old = p.toxicity || 0;
       p.toxicity = XG.util.clamp(old + out.toxicity, 0, 100); // 正加負減，clamp 0~100
       const real = p.toxicity - old;
-      rw.toxicity = (rw.toxicity || 0) + real;
-      if (real) msg.push(real > 0 ? '丹毒 +' + resultInt(real) : '丹毒 ' + resultInt(real));
       XG.bus.emit('res:changed');
     }
     if (out.rootWash) {
@@ -461,6 +463,9 @@
       result.hiddenEnd = out.hiddenEnd;
       XG.bus.emit('adv:hiddenEnd', { eventId: e.id, text: out.hiddenEnd });
     }
+    const toxDelta=(p.toxicity||0)-toxBefore;
+    if(toxDelta){rw.toxicity=toxDelta;const rounded=Math.round(toxDelta);msg.push(rounded?'丹毒 '+(rounded>0?'+':'')+resultInt(rounded):(toxDelta>0?'丹毒略增':'丹毒略減'));}
+    if((toxBefore>50)!==((p.toxicity||0)>50))XG.stats.invalidate();
   }
 
   /* ---------------- 系統註冊（契約 §10 模塊協議） ---------------- */
@@ -518,6 +523,7 @@
     isUnlocked: isUnlocked,
 
     getPending() {
+      if(!isUnlocked())return null;
       const a = adv();
       if (!a.pending) return null;
       const e = index().byId[a.pending.id];
@@ -531,6 +537,7 @@
     },
 
     choose(choiceIdx) {
+      if(!isUnlocked())return {ok:false,msg:'入宗後請到宗門處理事務。'};
       const a = adv();
       if (!a.pending) return { ok: false, err: 'no_pending' };
       const e = index().byId[a.pending.id];
@@ -566,6 +573,7 @@
     },
 
     triggerOnMap(mapId) {
+      if(!isUnlocked())return {ok:false,err:'sect_route'};
       const e = rollExploreEvent(mapId);
       if (!e) return { ok: false, err: 'no_event' };
       const a = adv();

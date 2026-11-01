@@ -430,6 +430,7 @@
     const keptPvp={season:st.pvp.season,pending:st.pvp.pending||[],balanceVersion:st.pvp.balanceVersion};
     st.pvp = Object.assign(def.pvp,keptPvp);
     st.adventure = def.adventure;
+    delete st.sect; // v2.0 每世重新選擇道路，丹藥與宗門職位不跨世。
     st.daily = def.daily;
     // 保留不碰：codex / ach(含永久 eff) / fellows(見下) / news / stats / settings /
     //          createdAt / totalOnlineSec

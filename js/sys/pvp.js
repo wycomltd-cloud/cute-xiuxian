@@ -188,6 +188,7 @@
 
   // 發修為：優先走 cultivation 系統，缺位則直接加 state.player.cult（防禦性）
   function grantCult(n, src) {
+    XG.balance.applyActivityToxicity(n);
     const cv = XG.sys.cultivation;
     if (cv && typeof cv.addCult === 'function') {
       try { cv.addCult(n, src); return; } catch (e) { /* fallthrough */ }
@@ -284,7 +285,10 @@
   }
 
   /* ---------------- 戰鬥結算 ---------------- */
-  function fight(uid) {
+  function fight(uid,sectBattle) {
+    const inSect=XG.sys.sect&&XG.sys.sect.active();
+    if(inSect&&!sectBattle)return {ok:false,reason:'入宗後請參加宗門大比。'};
+    if(sectBattle&&!inSect)return {ok:false,reason:'尚未加入宗門。'};
     if (!XG.cfg.isUnlocked('pvp')) return { ok: false, reason: '論劍臺尚未開啓（需金丹5層）。' };
     if (!getSchool().id || (XG.character && XG.character.needsChoice())) return { ok: false, reason: '請先在選角畫面選定本世性別與修行。' };
     const p = st();
@@ -366,9 +370,10 @@
       const cult = XG.balance.activityCult(Math.round(baseRate * (win ? 12 : 6) * XG.util.rand(0.9, 1.2))); // 原始秒數再經單次活動公式換算
       const stoneBase=[1,2,4,8,16,30,50,80,120,120][pl.realmIdx];
       const lingShi = Math.max(1,Math.round(stoneBase*(win?1:.5)*XG.util.rand(.8,1.2)));
-      grantCult(cult, win ? '論劍得勝' : '論劍惜敗');
+      const converted=inSect?XG.sys.sect.convertCult(cult,'宗門大比'):0;
+      if(!inSect)grantCult(cult, win ? '論劍得勝' : '論劍惜敗');
       XG.addRes({ lingShi: lingShi });
-      reward = { cult: cult, lingShi: lingShi };
+      reward = { cult: inSect?0:cult, lingShi: lingShi+converted };
       XG.state.daily.pvpCount = dailyCount() + 1;
     }
 
@@ -501,7 +506,7 @@
     tick(dt) {
       checkSeason();
       const p = st();
-      if (p.auto !== null) {
+      if (p.auto !== null && !(XG.sys.sect&&XG.sys.sect.active())) {
         p.auto.cd = (p.auto.cd || 0) - dt;
         if (p.auto.cd <= 0) {
           p.auto.cd = 3;
@@ -530,7 +535,8 @@
     // 對外接口
     canFight: canFight,
     match: match,
-    fight: fight,
+    fight: function(uid){return fight(uid,false);},
+    fightSect: function(){return fight(null,true);},
     getOverview: getOverview,
     getHistory: getHistory,
     claimSeason: claimSeason,

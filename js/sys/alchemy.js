@@ -695,7 +695,7 @@
       const a = A();
       if (!a) return null;
       const p = XG.state.player;
-      if (p.toxicity > 0) p.toxicity = Math.max(0, p.toxicity - dt * TOX_DECAY_PER_SEC);
+      if (p.toxicity > 0) {const before=p.toxicity;p.toxicity=Math.max(0,p.toxicity-dt*TOX_DECAY_PER_SEC);checkToxBand(before,p.toxicity);}
 
       const frag = { events: [] };
       if (a.job && a.job.endAt <= Date.now()) {

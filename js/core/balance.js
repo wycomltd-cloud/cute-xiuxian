@@ -3,7 +3,7 @@
   'use strict';
   const XG = window.XG;
   const B = XG.balance = {
-    version: '1.9.4',
+    version: '2.0.2',
     targetHours: [1/3,24,48,96,120,144,168,192,216],
     exploreHourly: [180,600,1800,4800,12000,24000,42000,66000,96000,96000],
     petGradeMult: [1,1,1.4,1.8,2.3,3],
@@ -86,11 +86,28 @@
       const stone=Math.max(1,Math.ceil(base*mult),floor);
       return cur==='lingYu' ? Math.max(1,Math.ceil(stone/500)) : stone;
     },
-    // v1.9.4：單次報酬採較小、平滑成長的值；無每日總額、無次數遞減，舊額度欄位不再讀寫。
+    // v2.0.1：路線差異只作用於金丹後主動活動，不改掛機／吐納／普通丹藥。
+    isRiskyWanderer() {return XG.state.player.realmIdx>=2&&!(XG.sys.sect&&XG.sys.sect.active());},
+    boostActivityCult(n) {n=Number(n)||0;return n>0?Math.max(1,Math.floor(n*(this.isRiskyWanderer()?1.25:1))):0;},
+    activityToxicity(n) {
+      if(!this.isRiskyWanderer()||!(n>0))return 0;
+      const seconds=n/Math.max(1,this.standardRate());
+      return Math.round(Math.min(8,Math.max(.2,seconds/30))*1000)/1000;
+    },
+    // 僅在成功發獎時調用；報價、預覽與失敗操作不可調用。
+    applyActivityToxicity(n) {
+      const gain=this.activityToxicity(n);if(!gain)return 0;
+      const p=XG.state.player,before=p.toxicity||0;
+      p.toxicity=Math.min(100,Math.round((before+gain)*1000)/1000);
+      const stats=XG.state.stats=XG.state.stats||{};stats.tox_max=Math.max(stats.tox_max||0,p.toxicity);if(p.toxicity>=100)stats.tox100=1;
+      if((before>50)!==(p.toxicity>50))XG.stats.invalidate();
+      XG.bus.emit('save:dirty');return p.toxicity-before;
+    },
+    // v2.0：單次報酬採較小、平滑成長的值；無每日總額、無次數遞減，舊額度欄位不再讀寫。
     activityCult(n) {
       n=Number(n)||0;if(n<=0)return 0;
       const rate=this.standardRate();if(!(rate>0))return 0;
-      return Math.max(1,Math.floor(rate*15*Math.log1p(n/(rate*120))));
+      return this.boostActivityCult(rate*15*Math.log1p(n/(rate*120)));
     },
     activityStone(n) {
       n=Number(n)||0;if(n<=0)return 0;

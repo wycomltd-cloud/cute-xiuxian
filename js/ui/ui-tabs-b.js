@@ -1131,6 +1131,8 @@
   const pvpTab = {
     id: 'pvp', name: '鬥法', icon: '⚔️', order: 23, main: false, sysId: 'pvp',
     mount(el) {
+      if(XG.sys.sect&&XG.sys.sect.active()){this._sect=true;XG.ui.sectMount(el,'contest');return;}
+      this._sect=false;
       injectStyle();
       pv.el = el;
       pv.opp = null; pv.busy = false; pv.lastRes = null;
@@ -1191,12 +1193,14 @@
       renderPvpAll();
     },
     update() {
+      if(this._sect){XG.ui.sectUpdate();return;}
       if (!pv.el || !isUnlocked('pvp')) return;
       renderPvpTop();
       renderPvpMatch(); // busy 時內部跳過
       renderPvpHist();
     },
     unmount() {
+      if(this._sect){XG.ui.sectUnmount();this._sect=false;return;}
       clearPvTimers();
       pv.busy = false;
       if (pv.el && pv.handler) pv.el.removeEventListener('click', pv.handler);

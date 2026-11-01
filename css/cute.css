@@ -58,3 +58,17 @@ html,body{background:#f7f7ee;color:var(--ink);font:14px/1.7 var(--font-kai)}body
 .cute-scene-school-art,.cute-photo-school-art{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}.cute-school-art{display:block;width:100%;height:100%;overflow:hidden}.cute-scene-school-art{animation:cuteSchoolAppear .55s ease-out}.cute-photo-school-art{animation:none}
 @keyframes cuteSchoolAppear{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.cute-scene-school-art{animation:none}}
+
+/* v2.0 宗門：沿用紙張、青綠與淡金，手機操作留足間距。 */
+.sect-home-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #d8dfc6;border-radius:20px;padding:16px 18px;background:linear-gradient(120deg,#eef2df,#fffaf0);margin:0 0 18px}
+.sect-home-strip b,.sect-home-strip span{display:block}.sect-home-strip b{color:#526d50}.sect-home-strip span{font-size:13px;color:#828875;margin-top:4px}.sect-home-strip .btn{flex-shrink:0}
+.sect-page{max-width:950px;margin:auto}.sect-page-head{padding:12px 4px 20px}.sect-page-head h2{font-size:29px;color:#526d50;margin:8px 0}.sect-page-head p{color:#828875}.sect-eyebrow{font-size:11px;letter-spacing:1.6px;color:#9b8d65}
+.sect-route-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:8px 0 18px}.sect-path{border:1px solid #dce2ce;border-radius:24px;background:#fffdf6;padding:25px}.sect-path-gold{background:linear-gradient(140deg,#faf6e5,#f0f4e6)}.sect-symbol{font-size:32px}.sect-path h3{color:#526d50}.sect-path p{min-height:54px;color:#828875;line-height:1.7}
+.sect-summary{display:flex;flex-wrap:wrap;gap:10px 24px;background:#edf2e3;border-radius:18px;padding:16px;margin-bottom:16px;color:#526d50}.sect-nav{display:flex;gap:8px;overflow-x:auto;padding:0 0 16px}.sect-nav .btn{white-space:nowrap;flex-shrink:0}.sect-actions{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}.sect-card p{line-height:1.8}.sect-card{margin-bottom:16px}.sect-pill{padding:16px 0;border-bottom:1px dashed #dce2ce}.sect-pill:last-child{border:0}.sect-pill p{margin:5px 0}.sect-checks{display:grid;gap:8px;margin:12px 0 20px;color:#687a5b}.sect-bouts{display:grid;gap:8px;margin:16px 0}.sect-bouts>div{display:flex;gap:20px;padding:12px;border-radius:12px;background:#f0f3e8}.sect-log{border-bottom:1px dashed #dce2ce;padding-bottom:10px}
+@media(max-width:600px){.sect-route-grid{grid-template-columns:1fr}.sect-path{padding:20px}.sect-path p{min-height:0}.sect-home-strip{align-items:flex-start;padding:14px;gap:8px}.sect-home-strip .btn{font-size:13px;padding:10px 12px}.sect-summary{gap:8px 15px;font-size:14px}.sect-actions>.btn{max-width:100%;white-space:normal}.sect-page-head h2{font-size:25px}.sect-bouts>div{gap:12px}}
+
+.sect-battle-detail{display:block;color:#828875;font-size:12px;margin-top:5px}
+
+/* v2.0.2：五宗庭院層與主角圖使用相同裁切，中央透明，不加柔焦。 */
+.cute-scene-sect-art,.cute-photo-sect-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:1;pointer-events:none;user-select:none}
+.cute-scene-sect-art[hidden]{display:none}

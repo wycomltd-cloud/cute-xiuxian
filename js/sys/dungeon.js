@@ -268,6 +268,7 @@
   function giveCult(n, src) {
     n = Math.floor(n);
     if (n <= 0) return 0;
+    XG.balance.applyActivityToxicity(n);
     const cv = XG.sys.cultivation;
     if (cv && typeof cv.addCult === 'function') {
       try { cv.addCult(n, src); return n; } catch (e) { console.error('[dungeon] cultivation.addCult 出錯', e); }

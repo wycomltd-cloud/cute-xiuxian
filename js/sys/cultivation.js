@@ -282,7 +282,14 @@
     // 離線結算：全額修為收益（無衰減，沿用當前模式倍率）+ 離線頓悟按機率折算，返回 {cultGain, dunwuProcs}
     offline(dt) {
       if (!dt || dt <= 0) return { cultGain: 0 };
-      const rate = XG.stats ? XG.stats.get().cultRate : 0;
+      let rate = XG.stats ? XG.stats.get().cultRate : 0;
+      const player=XG.state.player,tox=player.toxicity||0;
+      if(tox>50){
+        const decay=XG.sys.alchemy?XG.sys.alchemy.getToxInfo().decayPerSec:1/60;
+        const toxicSeconds=Math.min(dt,(tox-50)/decay);
+        const realm=XG.cfg.REALMS[player.realmIdx],base=realm.rate*(1+.12*(player.layer-1));
+        rate+=base*.2*(1-toxicSeconds/dt);
+      }
       const gain = rate * dt;
       if (gain > 0) {
         XG.state.player.cult = (XG.state.player.cult || 0) + gain;
