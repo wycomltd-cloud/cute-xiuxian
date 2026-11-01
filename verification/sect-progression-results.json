@@ -1,0 +1,1972 @@
+{
+  "version": "2.0.1",
+  "target": "同等登入頻率與操作步驟，從金丹一層到大乘十層輪回挑戰資格，比較新散修高收益／丹毒與五職位宗門的成長節奏",
+  "assumptions": [
+    "每次登入：散修論道全體＋一次代表性奇遇＋3場鬥法；宗門一件親自事務＋一堂實修授業＋3場大比",
+    "兩路同為閉關、固定25%永久加成、每次5次吐納；無額外初始資產、無免費注入丹藥或貨幣",
+    "宗門將活動所得靈石與可用貢獻購成自用丹，按實際職位領丹與晉升；未用靈玉購丹",
+    "未模擬共同的靈寵、坊市購買、功法裝備、所有隨機奇遇及遊戲經濟；單次操作數相同，不代表實際秒數完全一致",
+    "每種登入頻率20個固定種子，運行真實突破／渡劫；終點是可挑戰輪回，未保證九劫成功"
+  ],
+  "results": [
+    {
+      "loginsPerDay": 2,
+      "wandererMeanDays": 29.942,
+      "sectMeanDays": 28.716,
+      "differencePct": -4.09,
+      "allReached": true,
+      "samples": {
+        "scatter": [
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 17,
+            "days": 30.017,
+            "eligible": true,
+            "sessions": 60,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 6.003,
+              "5": 12.007,
+              "6": 18.51,
+              "7": 24.514
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 114,
+            "days": 30.017,
+            "eligible": true,
+            "sessions": 60,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 7.504,
+              "5": 13.007,
+              "6": 18.51,
+              "7": 24.514
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 211,
+            "days": 29.016,
+            "eligible": true,
+            "sessions": 58,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 10.506,
+              "6": 17.009,
+              "7": 23.513
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 308,
+            "days": 30.017,
+            "eligible": true,
+            "sessions": 60,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 10.005,
+              "6": 16.009,
+              "7": 24.514
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 405,
+            "days": 29.516,
+            "eligible": true,
+            "sessions": 59,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 11.006,
+              "6": 17.009,
+              "7": 24.013
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 502,
+            "days": 31.017,
+            "eligible": true,
+            "sessions": 62,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 7.004,
+              "5": 11.506,
+              "6": 18.01,
+              "7": 25.514
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 599,
+            "days": 30.017,
+            "eligible": true,
+            "sessions": 60,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 11.506,
+              "6": 17.009,
+              "7": 24.514
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 696,
+            "days": 29.516,
+            "eligible": true,
+            "sessions": 59,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.502,
+              "4": 6.504,
+              "5": 11.506,
+              "6": 17.009,
+              "7": 24.013
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 793,
+            "days": 30.017,
+            "eligible": true,
+            "sessions": 60,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 11.506,
+              "6": 17.009,
+              "7": 24.514
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 890,
+            "days": 29.016,
+            "eligible": true,
+            "sessions": 58,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 6.003,
+              "5": 11.006,
+              "6": 16.509,
+              "7": 23.513
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 987,
+            "days": 28.015,
+            "eligible": true,
+            "sessions": 56,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 10.005,
+              "6": 15.509,
+              "7": 22.512
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 1084,
+            "days": 33.519,
+            "eligible": true,
+            "sessions": 67,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 7.004,
+              "5": 12.507,
+              "6": 19.511,
+              "7": 28.015
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 1181,
+            "days": 29.516,
+            "eligible": true,
+            "sessions": 59,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 10.506,
+              "6": 17.009,
+              "7": 24.013
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 1278,
+            "days": 28.516,
+            "eligible": true,
+            "sessions": 57,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 6.003,
+              "5": 11.006,
+              "6": 17.009,
+              "7": 23.013
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 1375,
+            "days": 30.017,
+            "eligible": true,
+            "sessions": 60,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 6.504,
+              "5": 11.006,
+              "6": 17.009,
+              "7": 24.514
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 1472,
+            "days": 30.517,
+            "eligible": true,
+            "sessions": 61,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 7.004,
+              "5": 11.506,
+              "6": 18.51,
+              "7": 25.014
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 1569,
+            "days": 30.517,
+            "eligible": true,
+            "sessions": 61,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 10.005,
+              "6": 16.509,
+              "7": 25.014
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 1666,
+            "days": 29.516,
+            "eligible": true,
+            "sessions": 59,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.502,
+              "4": 7.004,
+              "5": 12.007,
+              "6": 18.01,
+              "7": 24.013
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 1763,
+            "days": 30.517,
+            "eligible": true,
+            "sessions": 61,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 10.506,
+              "6": 17.51,
+              "7": 25.014
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 2,
+            "seed": 1860,
+            "days": 30.017,
+            "eligible": true,
+            "sessions": 60,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 6.003,
+              "5": 11.506,
+              "6": 17.009,
+              "7": 24.514
+            }
+          }
+        ],
+        "sect": [
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 17,
+            "days": 27.515,
+            "eligible": true,
+            "sessions": 55,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 10.005,
+              "6": 16.009,
+              "7": 22.012
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 114,
+            "days": 27.515,
+            "eligible": true,
+            "sessions": 55,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 6.003,
+              "5": 11.006,
+              "6": 16.009,
+              "7": 22.012
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 211,
+            "days": 30.017,
+            "eligible": true,
+            "sessions": 60,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 10.005,
+              "6": 16.509,
+              "7": 24.514
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 308,
+            "days": 29.016,
+            "eligible": true,
+            "sessions": 58,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 11.506,
+              "6": 16.509,
+              "7": 23.513
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 405,
+            "days": 30.017,
+            "eligible": true,
+            "sessions": 60,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 7.004,
+              "5": 12.007,
+              "6": 17.009,
+              "7": 24.514
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 502,
+            "days": 27.515,
+            "eligible": true,
+            "sessions": 55,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 10.005,
+              "6": 15.008,
+              "7": 22.012
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 599,
+            "days": 29.016,
+            "eligible": true,
+            "sessions": 58,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 6.003,
+              "5": 11.006,
+              "6": 17.51,
+              "7": 23.513
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 696,
+            "days": 27.515,
+            "eligible": true,
+            "sessions": 55,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 11.006,
+              "6": 16.009,
+              "7": 22.012
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 793,
+            "days": 28.015,
+            "eligible": true,
+            "sessions": 56,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 6.003,
+              "5": 10.506,
+              "6": 16.509,
+              "7": 22.512
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 890,
+            "days": 28.015,
+            "eligible": true,
+            "sessions": 56,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 6.003,
+              "5": 10.506,
+              "6": 16.509,
+              "7": 22.512
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 987,
+            "days": 29.516,
+            "eligible": true,
+            "sessions": 59,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 6.003,
+              "5": 10.506,
+              "6": 17.51,
+              "7": 24.013
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 1084,
+            "days": 27.515,
+            "eligible": true,
+            "sessions": 55,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 6.504,
+              "5": 11.006,
+              "6": 16.009,
+              "7": 22.012
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 1181,
+            "days": 29.516,
+            "eligible": true,
+            "sessions": 59,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 6.003,
+              "5": 11.506,
+              "6": 17.51,
+              "7": 24.013
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 1278,
+            "days": 28.015,
+            "eligible": true,
+            "sessions": 56,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 10.506,
+              "6": 15.509,
+              "7": 22.512
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 1375,
+            "days": 30.517,
+            "eligible": true,
+            "sessions": 61,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 11.006,
+              "6": 18.51,
+              "7": 25.514
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 1472,
+            "days": 27.515,
+            "eligible": true,
+            "sessions": 55,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 11.006,
+              "6": 16.009,
+              "7": 22.012
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 1569,
+            "days": 27.515,
+            "eligible": true,
+            "sessions": 55,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 5.503,
+              "5": 10.005,
+              "6": 15.008,
+              "7": 22.012
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 1666,
+            "days": 30.517,
+            "eligible": true,
+            "sessions": 61,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.001,
+              "4": 6.003,
+              "5": 10.506,
+              "6": 17.009,
+              "7": 25.014
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 1763,
+            "days": 28.015,
+            "eligible": true,
+            "sessions": 56,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 6.003,
+              "5": 10.506,
+              "6": 16.509,
+              "7": 22.512
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 2,
+            "seed": 1860,
+            "days": 31.518,
+            "eligible": true,
+            "sessions": 64,
+            "milestones": {
+              "2": 0.5,
+              "3": 2.501,
+              "4": 6.504,
+              "5": 11.006,
+              "6": 17.009,
+              "7": 26.515
+            }
+          }
+        ]
+      }
+    },
+    {
+      "loginsPerDay": 6,
+      "wandererMeanDays": 28.08,
+      "sectMeanDays": 27.278,
+      "differencePct": -2.85,
+      "allReached": true,
+      "samples": {
+        "scatter": [
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 17,
+            "days": 29.382,
+            "eligible": true,
+            "sessions": 176,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.175,
+              "5": 10.35,
+              "6": 17.696,
+              "7": 24.207
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 114,
+            "days": 28.714,
+            "eligible": true,
+            "sessions": 172,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 6.01,
+              "5": 10.183,
+              "6": 17.028,
+              "7": 23.539
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 211,
+            "days": 27.88,
+            "eligible": true,
+            "sessions": 167,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.17,
+              "4": 6.344,
+              "5": 10.517,
+              "6": 16.193,
+              "7": 22.704
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 308,
+            "days": 30.384,
+            "eligible": true,
+            "sessions": 182,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.17,
+              "4": 6.344,
+              "5": 10.517,
+              "6": 17.863,
+              "7": 25.208
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 405,
+            "days": 27.88,
+            "eligible": true,
+            "sessions": 167,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.175,
+              "5": 9.349,
+              "6": 15.526,
+              "7": 22.704
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 502,
+            "days": 29.716,
+            "eligible": true,
+            "sessions": 178,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.337,
+              "4": 5.676,
+              "5": 10.851,
+              "6": 16.527,
+              "7": 24.541
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 599,
+            "days": 28.547,
+            "eligible": true,
+            "sessions": 171,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.003,
+              "4": 5.843,
+              "5": 10.016,
+              "6": 16.193,
+              "7": 23.372
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 696,
+            "days": 26.043,
+            "eligible": true,
+            "sessions": 156,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.175,
+              "5": 9.349,
+              "6": 14.357,
+              "7": 20.868
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 793,
+            "days": 27.546,
+            "eligible": true,
+            "sessions": 165,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.003,
+              "4": 5.342,
+              "5": 10.183,
+              "6": 15.86,
+              "7": 22.37
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 890,
+            "days": 27.88,
+            "eligible": true,
+            "sessions": 167,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.003,
+              "4": 5.843,
+              "5": 10.517,
+              "6": 16.193,
+              "7": 22.704
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 987,
+            "days": 27.88,
+            "eligible": true,
+            "sessions": 167,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.175,
+              "5": 9.349,
+              "6": 15.526,
+              "7": 22.704
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 1084,
+            "days": 26.043,
+            "eligible": true,
+            "sessions": 156,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.175,
+              "5": 9.349,
+              "6": 14.357,
+              "7": 20.868
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 1181,
+            "days": 28.046,
+            "eligible": true,
+            "sessions": 168,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.003,
+              "4": 5.342,
+              "5": 10.017,
+              "6": 15.693,
+              "7": 22.871
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 1278,
+            "days": 27.379,
+            "eligible": true,
+            "sessions": 164,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 6.01,
+              "5": 10.684,
+              "6": 15.693,
+              "7": 22.203
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 1375,
+            "days": 28.046,
+            "eligible": true,
+            "sessions": 168,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.509,
+              "5": 10.685,
+              "6": 16.36,
+              "7": 22.871
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 1472,
+            "days": 28.046,
+            "eligible": true,
+            "sessions": 168,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.003,
+              "4": 5.342,
+              "5": 10.016,
+              "6": 15.693,
+              "7": 22.871
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 1569,
+            "days": 28.213,
+            "eligible": true,
+            "sessions": 169,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.003,
+              "4": 6.511,
+              "5": 10.851,
+              "6": 16.527,
+              "7": 23.038
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 1666,
+            "days": 27.045,
+            "eligible": true,
+            "sessions": 162,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.175,
+              "5": 9.85,
+              "6": 16.026,
+              "7": 21.87
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 1763,
+            "days": 27.88,
+            "eligible": true,
+            "sessions": 167,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.175,
+              "5": 9.349,
+              "6": 15.526,
+              "7": 22.704
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 6,
+            "seed": 1860,
+            "days": 29.048,
+            "eligible": true,
+            "sessions": 174,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.003,
+              "4": 5.843,
+              "5": 11.018,
+              "6": 16.694,
+              "7": 23.873
+            }
+          }
+        ],
+        "sect": [
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 17,
+            "days": 29.382,
+            "eligible": true,
+            "sessions": 176,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.003,
+              "4": 5.676,
+              "5": 10.35,
+              "6": 15.359,
+              "7": 24.374
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 114,
+            "days": 29.048,
+            "eligible": true,
+            "sessions": 174,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.17,
+              "4": 5.509,
+              "5": 10.183,
+              "6": 16.36,
+              "7": 24.04
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 211,
+            "days": 27.88,
+            "eligible": true,
+            "sessions": 167,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.17,
+              "4": 5.509,
+              "5": 9.683,
+              "6": 15.86,
+              "7": 22.871
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 308,
+            "days": 26.21,
+            "eligible": true,
+            "sessions": 157,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.175,
+              "5": 9.85,
+              "6": 14.858,
+              "7": 21.202
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 405,
+            "days": 27.713,
+            "eligible": true,
+            "sessions": 166,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.003,
+              "4": 6.511,
+              "5": 10.684,
+              "6": 15.693,
+              "7": 22.704
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 502,
+            "days": 25.876,
+            "eligible": true,
+            "sessions": 155,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.509,
+              "5": 9.683,
+              "6": 15.192,
+              "7": 20.868
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 599,
+            "days": 25.709,
+            "eligible": true,
+            "sessions": 154,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.175,
+              "5": 9.349,
+              "6": 14.357,
+              "7": 20.701
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 696,
+            "days": 25.709,
+            "eligible": true,
+            "sessions": 154,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.175,
+              "5": 9.349,
+              "6": 14.357,
+              "7": 20.701
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 793,
+            "days": 28.213,
+            "eligible": true,
+            "sessions": 169,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.843,
+              "5": 10.517,
+              "6": 15.526,
+              "7": 23.205
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 890,
+            "days": 26.878,
+            "eligible": true,
+            "sessions": 161,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.003,
+              "4": 5.676,
+              "5": 9.85,
+              "6": 15.359,
+              "7": 21.87
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 987,
+            "days": 29.215,
+            "eligible": true,
+            "sessions": 175,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.509,
+              "5": 10.183,
+              "6": 15.693,
+              "7": 24.207
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 1084,
+            "days": 25.375,
+            "eligible": true,
+            "sessions": 152,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.509,
+              "5": 9.683,
+              "6": 14.691,
+              "7": 20.367
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 1181,
+            "days": 26.377,
+            "eligible": true,
+            "sessions": 158,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.003,
+              "4": 5.342,
+              "5": 9.516,
+              "6": 15.693,
+              "7": 21.369
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 1278,
+            "days": 28.38,
+            "eligible": true,
+            "sessions": 170,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.509,
+              "5": 10.684,
+              "6": 15.693,
+              "7": 23.372
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 1375,
+            "days": 26.544,
+            "eligible": true,
+            "sessions": 159,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.509,
+              "5": 9.683,
+              "6": 15.86,
+              "7": 21.536
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 1472,
+            "days": 25.709,
+            "eligible": true,
+            "sessions": 154,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.003,
+              "4": 5.342,
+              "5": 9.516,
+              "6": 15.025,
+              "7": 20.701
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 1569,
+            "days": 25.709,
+            "eligible": true,
+            "sessions": 154,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.17,
+              "4": 5.843,
+              "5": 10.016,
+              "6": 15.025,
+              "7": 20.701
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 1666,
+            "days": 27.713,
+            "eligible": true,
+            "sessions": 166,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.175,
+              "5": 10.685,
+              "6": 16.193,
+              "7": 22.704
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 1763,
+            "days": 29.883,
+            "eligible": true,
+            "sessions": 179,
+            "milestones": {
+              "2": 0.167,
+              "3": 1.836,
+              "4": 5.175,
+              "5": 9.85,
+              "6": 17.028,
+              "7": 24.875
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 6,
+            "seed": 1860,
+            "days": 28.046,
+            "eligible": true,
+            "sessions": 168,
+            "milestones": {
+              "2": 0.167,
+              "3": 2.337,
+              "4": 6.511,
+              "5": 11.185,
+              "6": 16.694,
+              "7": 23.038
+            }
+          }
+        ]
+      }
+    },
+    {
+      "loginsPerDay": 24,
+      "wandererMeanDays": 24.78,
+      "sectMeanDays": 24.533,
+      "differencePct": -1,
+      "allReached": true,
+      "samples": {
+        "scatter": [
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 17,
+            "days": 23.53,
+            "eligible": true,
+            "sessions": 561,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.488,
+              "5": 8.682,
+              "6": 13.17,
+              "7": 19
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 114,
+            "days": 23.195,
+            "eligible": true,
+            "sessions": 553,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 5.201,
+              "5": 8.934,
+              "6": 13.422,
+              "7": 18.623
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 211,
+            "days": 24.16,
+            "eligible": true,
+            "sessions": 576,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.678,
+              "4": 4.697,
+              "5": 8.85,
+              "6": 14.387,
+              "7": 19.588
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 308,
+            "days": 26.677,
+            "eligible": true,
+            "sessions": 637,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 5.201,
+              "5": 10.695,
+              "6": 15.687,
+              "7": 22.146
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 405,
+            "days": 26.718,
+            "eligible": true,
+            "sessions": 637,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 5.201,
+              "5": 9.395,
+              "6": 13.841,
+              "7": 22.146
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 502,
+            "days": 23.572,
+            "eligible": true,
+            "sessions": 562,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.53,
+              "5": 8.682,
+              "6": 13.17,
+              "7": 19
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 599,
+            "days": 25.921,
+            "eligible": true,
+            "sessions": 618,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.887,
+              "4": 5.201,
+              "5": 9.395,
+              "6": 14.932,
+              "7": 21.391
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 696,
+            "days": 26.005,
+            "eligible": true,
+            "sessions": 620,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.488,
+              "5": 8.221,
+              "6": 13.757,
+              "7": 21.433
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 793,
+            "days": 28.103,
+            "eligible": true,
+            "sessions": 671,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.887,
+              "4": 5.914,
+              "5": 9.647,
+              "6": 14.638,
+              "7": 23.572
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 890,
+            "days": 24.16,
+            "eligible": true,
+            "sessions": 576,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.488,
+              "5": 8.221,
+              "6": 13.757,
+              "7": 19.588
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 987,
+            "days": 24.411,
+            "eligible": true,
+            "sessions": 582,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.488,
+              "5": 9.102,
+              "6": 14.638,
+              "7": 19.839
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 1084,
+            "days": 25.124,
+            "eligible": true,
+            "sessions": 599,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.865,
+              "5": 8.598,
+              "6": 14.135,
+              "7": 20.594
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 1181,
+            "days": 26.005,
+            "eligible": true,
+            "sessions": 620,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 5.201,
+              "5": 9.395,
+              "6": 14.387,
+              "7": 21.475
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 1278,
+            "days": 24.873,
+            "eligible": true,
+            "sessions": 593,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.887,
+              "4": 5.201,
+              "5": 9.395,
+              "6": 13.883,
+              "7": 20.343
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 1375,
+            "days": 23.447,
+            "eligible": true,
+            "sessions": 559,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.677,
+              "4": 5.033,
+              "5": 9.186,
+              "6": 13.673,
+              "7": 18.875
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 1472,
+            "days": 23.908,
+            "eligible": true,
+            "sessions": 570,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.887,
+              "4": 4.865,
+              "5": 8.598,
+              "6": 14.135,
+              "7": 19.336
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 1569,
+            "days": 25.208,
+            "eligible": true,
+            "sessions": 601,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.488,
+              "5": 8.682,
+              "6": 14.219,
+              "7": 20.678
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 1666,
+            "days": 23.069,
+            "eligible": true,
+            "sessions": 551,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.488,
+              "5": 8.221,
+              "6": 12.709,
+              "7": 18.539
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 1763,
+            "days": 25.04,
+            "eligible": true,
+            "sessions": 597,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.678,
+              "4": 4.697,
+              "5": 8.43,
+              "6": 13.422,
+              "7": 20.51
+            }
+          },
+          {
+            "route": "wanderer",
+            "logins": 24,
+            "seed": 1860,
+            "days": 22.482,
+            "eligible": true,
+            "sessions": 536,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.488,
+              "5": 8.221,
+              "6": 12.709,
+              "7": 17.91
+            }
+          }
+        ],
+        "sect": [
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 17,
+            "days": 25.25,
+            "eligible": true,
+            "sessions": 602,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 6.249,
+              "5": 9.94,
+              "6": 14.387,
+              "7": 20.762
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 114,
+            "days": 27.222,
+            "eligible": true,
+            "sessions": 649,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 5.201,
+              "5": 8.892,
+              "6": 16.987,
+              "7": 22.733
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 211,
+            "days": 23.237,
+            "eligible": true,
+            "sessions": 554,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.887,
+              "4": 4.865,
+              "5": 8.556,
+              "6": 13.002,
+              "7": 18.749
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 308,
+            "days": 23.53,
+            "eligible": true,
+            "sessions": 561,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.678,
+              "4": 4.655,
+              "5": 8.347,
+              "6": 13.296,
+              "7": 19.042
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 405,
+            "days": 23.363,
+            "eligible": true,
+            "sessions": 557,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.488,
+              "5": 8.179,
+              "6": 13.128,
+              "7": 18.875
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 502,
+            "days": 22.817,
+            "eligible": true,
+            "sessions": 544,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.678,
+              "4": 5.033,
+              "5": 8.724,
+              "6": 13.17,
+              "7": 18.329
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 599,
+            "days": 23.656,
+            "eligible": true,
+            "sessions": 564,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.678,
+              "4": 4.655,
+              "5": 8.347,
+              "6": 12.793,
+              "7": 19.168
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 696,
+            "days": 23.321,
+            "eligible": true,
+            "sessions": 556,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 5.536,
+              "5": 9.269,
+              "6": 13.673,
+              "7": 18.833
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 793,
+            "days": 24.369,
+            "eligible": true,
+            "sessions": 581,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.678,
+              "4": 5.368,
+              "5": 9.06,
+              "6": 13.506,
+              "7": 19.881
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 890,
+            "days": 24.537,
+            "eligible": true,
+            "sessions": 585,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.678,
+              "4": 5.704,
+              "5": 9.857,
+              "6": 14.303,
+              "7": 20.049
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 987,
+            "days": 26.97,
+            "eligible": true,
+            "sessions": 643,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.678,
+              "4": 5.033,
+              "5": 9.605,
+              "6": 16.148,
+              "7": 22.482
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 1084,
+            "days": 23.656,
+            "eligible": true,
+            "sessions": 564,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.823,
+              "5": 8.976,
+              "6": 13.422,
+              "7": 19.168
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 1181,
+            "days": 23.488,
+            "eligible": true,
+            "sessions": 560,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.678,
+              "4": 4.655,
+              "5": 8.808,
+              "6": 13.254,
+              "7": 19
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 1278,
+            "days": 26.634,
+            "eligible": true,
+            "sessions": 635,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.678,
+              "4": 4.655,
+              "5": 10.108,
+              "6": 14.554,
+              "7": 22.146
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 1375,
+            "days": 23.488,
+            "eligible": true,
+            "sessions": 560,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.488,
+              "5": 8.179,
+              "6": 12.625,
+              "7": 19
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 1472,
+            "days": 25.25,
+            "eligible": true,
+            "sessions": 602,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.51,
+              "4": 4.865,
+              "5": 9.437,
+              "6": 14.387,
+              "7": 20.762
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 1569,
+            "days": 25.334,
+            "eligible": true,
+            "sessions": 604,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.887,
+              "4": 4.865,
+              "5": 8.556,
+              "6": 15.1,
+              "7": 20.846
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 1666,
+            "days": 25.921,
+            "eligible": true,
+            "sessions": 618,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.678,
+              "4": 4.655,
+              "5": 8.808,
+              "6": 13.254,
+              "7": 21.433
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 1763,
+            "days": 24.537,
+            "eligible": true,
+            "sessions": 585,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.887,
+              "4": 4.865,
+              "5": 9.437,
+              "6": 14.932,
+              "7": 20.049
+            }
+          },
+          {
+            "route": "sect",
+            "logins": 24,
+            "seed": 1860,
+            "days": 24.076,
+            "eligible": true,
+            "sessions": 574,
+            "milestones": {
+              "2": 0.042,
+              "3": 1.678,
+              "4": 4.655,
+              "5": 8.347,
+              "6": 13.841,
+              "7": 19.588
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
